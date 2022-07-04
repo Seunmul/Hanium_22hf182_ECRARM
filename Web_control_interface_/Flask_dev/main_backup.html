@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <title>{{title}}</title>
+        <link href="{{ url_for('static', filename='main.css') }}" rel="stylesheet" type="text/css">
+    </head>
+
+    <body>
+      <div class="HEAD">
+        <div style="text-align: left;"> 마지막 로딩: {{time}} </div>
+        <h1 id="WEB_TITLE">FLASK TEST</h1>
+        <div style="text-align:center;">flask_rendering by Jinja</div>
+        <div style="text-align:center; margin-top:10px" id="clock"></div>
+      </div>
+
+      <div class="REQUEST">
+        <h2>-----</h2>
+        <h2>Input Message to Send...</h2>
+        <br>
+        <form name="message_form">
+            <input type="text" name="msg">
+            <button type="submit" id="submit" onclick=msg_send()>
+                Send Message
+            </button>
+        </form>
+
+        <script language="javascript">
+            function msg_send(){
+                document.message_form.submit()
+            }
+        </script> 
+        <script type="text/javascript" src="../static/clock.js"></script>
+      </div>
+
+      <div class="REQUEST_STR">
+        <p>{{text}}</p>
+      </div>
+    </body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+    <head>
+        <!-- Required meta tags -->
+        <title>test</title>
+        <link href="./test.css" rel="stylesheet" type="text/css">
+    </head>
+    <body>
+        <h1>TEST</h1>
+        <p>hello world</p>
+        <div id="value"class="">
+
+        </div>
+        <input id="msg" type="text" onchange="showtext();">값을 입력하세요
+        </input>
+    </body>
+    <script>
+        
+        const a=5
+        const b=10
+        console.log(a+b)
+        var msg = prompt("값을 입력하세요:")
+        console.log(msg)
+
+        function showtext() {
+            var temp=document.getElementById('msg').value;
+            console.log(temp)
+          }
+        
+    </script>
+</html>

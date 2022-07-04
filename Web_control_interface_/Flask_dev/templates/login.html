@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLASK TEST SERVER</title>
+    <link href="{{ url_for('static', filename='login.css') }}" rel="stylesheet" type="text/css">
+    
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css">
+</head>
+<body>
+    <!-- <div class="show-login-btn"><i class="fas fa-sign-in-alt"></i> Show Login Form</div>     -->
+
+    <div class="login-box">
+        <div class="hide-login-btn">
+            <i class="fas fa-times"></i>
+        </div>
+        <form class="login-form" action="index.html" method="post" style="font-family: '나눔고딕';">
+          <div id="LOGIN-MAIN"style="display:flex; align-items: center; justify-content:flex-start; flex-direction:column; height:40vh">
+            <div style="text-align:left; font-size:15px; width:100%">[2022 소자분류로봇 PROJECT]</div>
+            <div style="margin-top:20px; margin-bottom:25px; font-size:50px;">CONTROL SYSTEM<br>
+                <div style="margin-top:20px; font-size:13px;">- 김영희, 박건하, 이희원, 차우석 -</div>
+            </div>
+            <!-- <input class="txtb" type="text" name="id" placeholder="Username">
+            <input class="txtb" type="password" name="password" placeholder="Password"> -->
+            <a style="font-size:24px;" href="{{ url_for('main') }}" class="login-btn">LOGIN</a>
+          </div>  
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <script src="../static/login.js"></script>
+</body>
+</html>
