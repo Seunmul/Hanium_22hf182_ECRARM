@@ -1,3 +1,4 @@
+#스텝모터 PWM 신호 인가 테스트 코드 => 
 from time import sleep
 import RPi.GPIO as GPIO
 

@@ -1,8 +1,9 @@
 #https://sourceforge.net/p/raspberry-gpio-python/wiki/PWM/https://sourceforge.net/p/raspberry-gpio-python/wiki/PWM/
+##pwm Servo motor control 테스트 코드
 import RPi.GPIO as GPIO
 import time
 
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BOARD) #보드 핀 배열 사용
 
 FREQ = 50 #set FREQ
 PIN_ARR = [13,15] #testPIN number
@@ -32,7 +33,7 @@ def SERVO_PWM_SET(PIN,dutyCycle):
     GPIO.setup(PIN_ARR[1],GPIO.OUT) #GPIO PIN number에 맞게 셋업 : GPIO.OUT / GPIO.IN   
     PIN_PWM[1].ChangeDutyCycle(dutyCycle)
     time.sleep(0.6)
-    GPIO.setup(PIN_ARR[1],GPIO.IN)
+    GPIO.setup(PIN_ARR[1],GPIO.IN) # GPIO 사용 후 OUT --> IN 추가적인 떨림 제거
 
 def SERVO_PWM_CONTROL() :
     

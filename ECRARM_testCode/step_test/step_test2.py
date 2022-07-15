@@ -1,3 +1,4 @@
+#스텝모터 제어 예시 코드 2
 #-*- coding: utf-8 -*-
 import time
 import RPi.GPIO as GPIO

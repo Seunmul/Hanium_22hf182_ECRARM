@@ -1,4 +1,5 @@
-
+#하단 스텝모터, 중간관절 서보모터 그리퍼 서보모터 + pca9685사용
+#더미 로봇팔 제어 코드
 import time
 import RPi.GPIO as GPIO
 from collections import deque
