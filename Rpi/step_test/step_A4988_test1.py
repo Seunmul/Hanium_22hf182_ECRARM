@@ -44,6 +44,7 @@ if __name__ =="__main__":
     DIRPIN = 31
     ENPIN = 33
     STPES_PER_REVOLUTION = 1600
+
     FREQ= 60
     PINS = [STEPPIN,DIRPIN,ENPIN,35]
 
@@ -60,9 +61,9 @@ if __name__ =="__main__":
                 GPIO.output(STEPPIN,GPIO.HIGH)
                 time.sleep(0.0001) 
                 # print(i)
-            GPIO.output(ENPIN,GPIO.HIGH) # set ENPIN HIGH
-            time.sleep(1.5)
-            GPIO.output(ENPIN,GPIO.LOW) # set ENPIN LOW => start control
+            # GPIO.output(ENPIN,GPIO.HIGH) # set ENPIN HIGH
+            time.sleep(2)
+            # GPIO.output(ENPIN,GPIO.LOW) # set ENPIN LOW => start control
             
             #counterclockwise
             GPIO.output(DIRPIN,GPIO.LOW) # set ENPIN LOW => start control
@@ -75,11 +76,11 @@ if __name__ =="__main__":
             
             #stop
             print("stop\n")
-            GPIO.output(ENPIN,GPIO.HIGH) # set ENPIN HIGH
-            time.sleep(1.5)
+            # GPIO.output(ENPIN,GPIO.HIGH) # set ENPIN HIGH
+            time.sleep(2)
 
             #restart
-            GPIO.output(ENPIN,GPIO.LOW) # set ENPIN LOW => start control
+            # GPIO.output(ENPIN,GPIO.LOW) # set ENPIN LOW => start control
 
     except KeyboardInterrupt :
         pass
