@@ -5,6 +5,8 @@ from _thread import *
 import sys
 import RPi.GPIO as GPIO
 
+sys.path.append("../lidar-vl53l0x")
+import i2c0_lidar as distance
 
 sys.path.append("../step_test")
 import step_A4988_test1 as stepControl
@@ -65,6 +67,13 @@ while True :
             time.sleep(2)
             print(" "+first_move[0]+" "+first_move[1]+" "+first_move[2]+" "+first_move[3]+" "+first_move[4]+"\n")
             stepControl.__CONTORL__(first_move[0],STEPPIN,DIRPIN,ENPIN)
+
+            ##########################################
+            #라이다 거리 받아오는 코드
+            dis = distance.detect_distance()
+            print(dis , "mm\n")
+            ##########################################
+
             g_send_message = True
             start_new_thread(send_data, (client_socket,))
     except KeyboardInterrupt:
