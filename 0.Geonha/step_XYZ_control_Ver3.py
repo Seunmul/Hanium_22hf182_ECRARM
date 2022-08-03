@@ -1,0 +1,118 @@
+# Import RPi lib
+import RPi.GPIO as GPIO
+
+# Import python Internal library
+import time
+from threading import Thread
+
+def _STEP_SETUP_(PINS, FREQ=60, MOTOR_MODE=1):
+    print("\nsetup.....")
+    # set GPIO mode => BOARD, BOARD GPIO = physical GPIO
+    GPIO.setmode(GPIO.BOARD)
+    INTERVAL_TIME = FREQ ** -1
+    MOTOR_PULSE = round(INTERVAL_TIME/2, 6)
+
+    print("스텝모터 구동방식(풀스텝=1, 하프스텝=2 ...) : " + str(MOTOR_MODE))
+    print("스텝모터 펄스 주파수 : " + str(round(FREQ, 3)) + "Hz")
+    print("스텝모터 펄스 주기 : " + str(INTERVAL_TIME) + "sec")
+    print("스텝모터 분당회전속도 : " + str(round(1.8/MOTOR_MODE/360*FREQ*60, 3)) + "rpm")
+    print("스텝모터 펄스레벨 변화주기 : " + str(MOTOR_PULSE)+"sec\n")
+
+    # setup GPIO PINS
+    for PIN in PINS:
+        # GPIO PIN number에 맞게 셋업 : GPIO.OUT / GPIO.IN
+        GPIO.setup(PIN, GPIO.OUT, initial=GPIO.LOW)
+    print("\nsetup completed\n")
+
+    return MOTOR_PULSE
+
+
+def _STEP_CONTROL_(AXIS, STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
+    GPIO.output(ENPIN, GPIO.LOW)  # set ENPIN LOW => start control
+    print("CONTROL %s : START" % s(AXIS))
+    for i in range(0, int(STEP)):
+        GPIO.output(STEPPIN, GPIO.LOW)
+        time.sleep(MOTOR_SPEED)
+        GPIO.output(STEPPIN, GPIO.HIGH)
+        time.sleep(MOTOR_SPEED)
+    print("CONTROL %s : END" % s(AXIS))
+    GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    time.sleep(SLEEPTIME)
+    return
+
+# 각도=>스텝 수로 변환 // mode=>풀스텝 시 1, 하프스텝시 2 .... 마이크로스텝에 따라 8,16 ....
+
+
+def _DEGREE_TO_STEPS_(degree=360, mode=1):
+    dir = 1
+    if(degree < 0):
+        degree = abs(degree)
+        dir = 0
+
+    # 오차 방지를 위해 정수로 반올림
+    return round(float(degree)*(mode/1.8), 0), dir
+
+
+if __name__ == "__main__":
+    print("step-X-Y-Z control Ver3.py")
+    # control params
+    STEPPIN_X, DIRPIN_X, ENPIN_X = 29, 31, 33
+    STEPPIN_Y, DIRPIN_Y, ENPIN_Y = 32, 36, 38
+    STEPPIN_Z, DIRPIN_Z, ENPIN_Z = 35, 37, 40
+    # stepmoter contorl params
+    MOTOR_MODE = 8
+    FREQ = 5000
+    PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X, STEPPIN_Y,
+            DIRPIN_Y, ENPIN_Y, STEPPIN_Z, DIRPIN_Z, ENPIN_Z]
+    # 구동 간 sleep타임
+    SLEEPTIME = 1
+    # pin setup=> 성공하면 펄스레벨 유지시간 상수 반환
+    PULSE_LEVEL_TIME = _STEP_SETUP_(PINS, FREQ, MOTOR_MODE)
+
+    print("start\n")
+    try:
+        while True:
+            # 사용자 입력 받기
+            steps, dir = _DEGREE_TO_STEPS_(
+                degree=int(input("각도를 입력하세요(0-360) : ")),
+                mode=MOTOR_MODE)
+            print("steps : %d dir : %d" % (steps, dir))
+
+            # 시간체크
+            start_time = time.time()
+
+            # __CONTROL _X:THREAD
+            X_axis = Thread(name="X_axis", target=_STEP_CONTROL_, args=("X", steps, STEPPIN_X,
+                                                                        DIRPIN_X, ENPIN_X, PULSE_LEVEL_TIME))
+            # __CONTROL _Y:THREAD
+            Y_axis = Thread(name="Y_axis", target=_STEP_CONTROL_, args=("Y", steps, STEPPIN_Y,
+                                                                        DIRPIN_Y, ENPIN_Y, PULSE_LEVEL_TIME))
+            # __CONTROL _Z:THREAD
+            Z_axis = Thread(name="Z_axis", target=_STEP_CONTROL_, args=("Z", steps, STEPPIN_Z,
+                                                                        DIRPIN_Z, ENPIN_Z, PULSE_LEVEL_TIME))
+
+            # Axises=[]
+            # Axises.append(X_axis)
+            # Axises.append(Y_axis)
+            # Axises.append(Z_axis)
+            # for Axis in Axises:
+            #     print(Axis.name)
+            #     Axix.start()
+
+            # start control thread
+            X_axis.start()
+            Y_axis.start()
+            Z_axis.start()
+            
+            # wait control thread
+            X_axis.join()
+            Y_axis.join()
+            Z_axis.join()
+
+            # 소요 시간 출력
+            print("--- %s seconds ---" % (time.time() - start_time))
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        GPIO.cleanup()
