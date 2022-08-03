@@ -31,8 +31,8 @@ def __CONTROL_X__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
         time.sleep(MOTOR_SPEED)
         # print(i,end=" ")
     print("\n__CONTROL_X : END\n")
-    time.sleep(1)
     GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    time.sleep(1)
 
     return
 
@@ -49,8 +49,8 @@ def __CONTROL_Y__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
         time.sleep(MOTOR_SPEED)
         # print(i,end=" ")
     print("\n__CONTROL_Y : END\n")
-    time.sleep(1)
     GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    time.sleep(1)
 
 
 def __CONTROL_Z__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
@@ -65,8 +65,8 @@ def __CONTROL_Z__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
         time.sleep(MOTOR_SPEED)
         # print(i,end=" ")
     print("\n__CONTROL_Z : END\n")
-    time.sleep(1)
     GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -97,7 +97,6 @@ if __name__ == "__main__":
             print("start clockwise : X")
             __CONTROL_X__(STPES_PER_REVOLUTION, STEPPIN_X,
                           DIRPIN_X, ENPIN_X, MOTOR_SPEED)
-            time.sleep(1)
             print("start counterclockwise : X")
             GPIO.output(DIRPIN_X, GPIO.LOW)
             __CONTROL_X__(STPES_PER_REVOLUTION, STEPPIN_X,
@@ -108,7 +107,6 @@ if __name__ == "__main__":
             print("start clockwise : Y")
             __CONTROL_Y__(STPES_PER_REVOLUTION, STEPPIN_Y,
                           DIRPIN_Y, ENPIN_Y, MOTOR_SPEED)
-            time.sleep(1)
             print("start counterclockwise : Y")
             GPIO.output(DIRPIN_Y, GPIO.LOW)
             __CONTROL_Y__(STPES_PER_REVOLUTION, STEPPIN_Y,
@@ -119,7 +117,6 @@ if __name__ == "__main__":
             print("start clockwise : Z")
             __CONTROL_Z__(STPES_PER_REVOLUTION, STEPPIN_Z,
                           DIRPIN_Z, ENPIN_Z, MOTOR_SPEED)
-            time.sleep(1)
             print("start counterclockwise : Z")
             GPIO.output(DIRPIN_Z, GPIO.LOW)
             __CONTROL_Z__(STPES_PER_REVOLUTION, STEPPIN_Z,
