@@ -107,8 +107,8 @@ if __name__ == "__main__":
             DIRPIN_Y, ENPIN_Y, STEPPIN_Z, DIRPIN_Z, ENPIN_Z]
     # 구동 간 sleep타임
     SLEEPTIME = 1
-    # pin setup=> 성공하면 펄스레벨 유지시간, 스탭모터 구동방식 상수 반환
-    MOTOR_PULSE = __SETUP__(PINS, FREQ, MOTOR_MODE)
+    # pin setup=> 성공하면 펄스레벨 유지시간 상수 반환
+    PULSE_LEVEL_TIME = __SETUP__(PINS, FREQ, MOTOR_MODE)
 
     # set ENPIN LOW => start control
     GPIO.output(ENPIN_X, GPIO.LOW)
@@ -122,45 +122,40 @@ if __name__ == "__main__":
                 "각도를 입력하세요(0-360) : "), mode=MOTOR_MODE)
             print("steps : "+str(STEPS))
 
+            #시간체크
+            start_time = time.time()
+
             #__CONTROL _X:THREAD
             GPIO.output(DIRPIN_X, GPIO.HIGH)
             X_axis = Thread(name="X_axis", target=__CONTROL_X__, args=(STEPS, STEPPIN_X,
-                          DIRPIN_X, ENPIN_X, MOTOR_PULSE))
+                          DIRPIN_X, ENPIN_X, PULSE_LEVEL_TIME))
             print(X_axis.name)
-            X_axis.start()
-            X_axis.join()
 
-            # __CONTROL _X
+            #__CONTROL _Y:THREAD
             GPIO.output(DIRPIN_X, GPIO.HIGH)
-            print("\nstart clockwise : X")
-            __CONTROL_X__(STEPS, STEPPIN_X,
-                          DIRPIN_X, ENPIN_X, MOTOR_PULSE)
-            print("start counterclockwise : X")
-            GPIO.output(DIRPIN_X, GPIO.LOW)
-            __CONTROL_X__(STEPS, STEPPIN_X,
-                          DIRPIN_X, ENPIN_X, MOTOR_PULSE)
+            Y_axis = Thread(name="Y_axis", target=__CONTROL_Y__, args=(STEPS, STEPPIN_Y,
+                          DIRPIN_Y, ENPIN_Y, PULSE_LEVEL_TIME))
+            print(Y_axis.name)
 
-            # __CONTROL _Y
-            GPIO.output(DIRPIN_Y, GPIO.HIGH)
-            print("start clockwise : Y")
-            __CONTROL_Y__(STEPS, STEPPIN_Y,
-                          DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
-            print("start counterclockwise : Y")
-            GPIO.output(DIRPIN_Y, GPIO.LOW)
-            __CONTROL_Y__(STEPS, STEPPIN_Y,
-                          DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
+            #__CONTROL _Z:THREAD
+            GPIO.output(DIRPIN_X, GPIO.HIGH)
+            Z_axis = Thread(name="Z_axis", target=__CONTROL_Z__, args=(STEPS, STEPPIN_Z,
+                          DIRPIN_Z, ENPIN_Z, PULSE_LEVEL_TIME))
+            print(Z_axis.name)
 
-            # __CONTROL _Z
-            GPIO.output(DIRPIN_Z, GPIO.HIGH)
-            print("start clockwise : Z")
-            __CONTROL_Z__(STEPS, STEPPIN_Z,
-                          DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)
-            print("start counterclockwise : Z")
-            GPIO.output(DIRPIN_Z, GPIO.LOW)
-            __CONTROL_Z__(STEPS, STEPPIN_Z,
-                          DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)
+            #start control thread
+            X_axis.start()
+            Y_axis.start()
+            Z_axis.start()
 
-            # print stop
+            X_axis.join()
+            Y_axis.join()
+            Z_axis.join()
+
+            #소요 시간 출력
+            print("--- %s seconds ---" % (time.time() - start_time))
+
+            #stop
             print("stop")
             time.sleep(3)
             print("restart\n-----\n")
@@ -172,3 +167,34 @@ if __name__ == "__main__":
         GPIO.output(ENPIN_Y, GPIO.HIGH)  # set ENPIN HIGH
         GPIO.output(ENPIN_Z, GPIO.HIGH)  # set ENPIN HIGH
         GPIO.cleanup()
+
+
+            # # __CONTROL _X
+            # GPIO.output(DIRPIN_X, GPIO.HIGH)
+            # print("\nstart clockwise : X")
+            # __CONTROL_X__(STEPS, STEPPIN_X,
+            #               DIRPIN_X, ENPIN_X, MOTOR_PULSE)
+            # print("start counterclockwise : X")
+            # GPIO.output(DIRPIN_X, GPIO.LOW)
+            # __CONTROL_X__(STEPS, STEPPIN_X,
+            #               DIRPIN_X, ENPIN_X, MOTOR_PULSE)
+
+            # # __CONTROL _Y
+            # GPIO.output(DIRPIN_Y, GPIO.HIGH)
+            # print("start clockwise : Y")
+            # __CONTROL_Y__(STEPS, STEPPIN_Y,
+            #               DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
+            # print("start counterclockwise : Y")
+            # GPIO.output(DIRPIN_Y, GPIO.LOW)
+            # __CONTROL_Y__(STEPS, STEPPIN_Y,
+            #               DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
+
+            # # __CONTROL _Z
+            # GPIO.output(DIRPIN_Z, GPIO.HIGH)
+            # print("start clockwise : Z")
+            # __CONTROL_Z__(STEPS, STEPPIN_Z,
+            #               DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)
+            # print("start counterclockwise : Z")
+            # GPIO.output(DIRPIN_Z, GPIO.LOW)
+            # __CONTROL_Z__(STEPS, STEPPIN_Z,
+            #               DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)

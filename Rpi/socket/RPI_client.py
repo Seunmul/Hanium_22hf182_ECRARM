@@ -5,8 +5,8 @@ from _thread import *
 import sys
 import RPi.GPIO as GPIO
 
-sys.path.append("../lidar-vl53l0x")
-import i2c0_lidar as distance
+# sys.path.append("../lidar-vl53l0x")
+# import i2c0_lidar as distance
 
 sys.path.append("../step_test")
 import step_A4988_test1 as stepControl
@@ -35,7 +35,7 @@ stepControl.__SETUP__(PINS)
 def send_data(client_socket) :
     global g_send_message
     if g_stop_sig == True:
-        return 
+        return
     if g_send_message == True :
         with lock :
             g_send_message = False
@@ -70,12 +70,12 @@ while True :
 
             ##########################################
             #라이다 거리 받아오는 코드
-            dis = distance.detect_distance()
-            print(dis , "mm\n")
+            # dis = distance.detect_distance()
+            # print(dis , "mm\n")
             ##########################################
 
             g_send_message = True
-            start_new_thread(send_data, (client_socket,))
+            start_new_thread(send_data, (client_socket,))      
     except KeyboardInterrupt:
         print("error processing")
         break
