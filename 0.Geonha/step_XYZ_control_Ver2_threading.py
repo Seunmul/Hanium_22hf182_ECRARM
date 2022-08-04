@@ -3,7 +3,6 @@ import RPi.GPIO as GPIO
 import time
 from threading import Thread
 
-
 def __SETUP__(PINS, FREQ=60, MOTOR_MODE=1):
 
     print("\nsetup.....")
@@ -173,34 +172,3 @@ if __name__ == "__main__":
         GPIO.output(ENPIN_Y, GPIO.HIGH)  # set ENPIN HIGH
         GPIO.output(ENPIN_Z, GPIO.HIGH)  # set ENPIN HIGH
         GPIO.cleanup()
-
-
-            # # __CONTROL _X
-            # GPIO.output(DIRPIN_X, GPIO.HIGH)
-            # print("\nstart clockwise : X")
-            # __CONTROL_X__(STEPS, STEPPIN_X,
-            #               DIRPIN_X, ENPIN_X, MOTOR_PULSE)
-            # print("start counterclockwise : X")
-            # GPIO.output(DIRPIN_X, GPIO.LOW)
-            # __CONTROL_X__(STEPS, STEPPIN_X,
-            #               DIRPIN_X, ENPIN_X, MOTOR_PULSE)
-
-            # # __CONTROL _Y
-            # GPIO.output(DIRPIN_Y, GPIO.HIGH)
-            # print("start clockwise : Y")
-            # __CONTROL_Y__(STEPS, STEPPIN_Y,
-            #               DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
-            # print("start counterclockwise : Y")
-            # GPIO.output(DIRPIN_Y, GPIO.LOW)
-            # __CONTROL_Y__(STEPS, STEPPIN_Y,
-            #               DIRPIN_Y, ENPIN_Y, MOTOR_PULSE)
-
-            # # __CONTROL _Z
-            # GPIO.output(DIRPIN_Z, GPIO.HIGH)
-            # print("start clockwise : Z")
-            # __CONTROL_Z__(STEPS, STEPPIN_Z,
-            #               DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)
-            # print("start counterclockwise : Z")
-            # GPIO.output(DIRPIN_Z, GPIO.LOW)
-            # __CONTROL_Z__(STEPS, STEPPIN_Z,
-            #               DIRPIN_Z, ENPIN_Z, MOTOR_PULSE)
