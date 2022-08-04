@@ -1,15 +1,15 @@
 import socket
 import time
 from _thread import *
-import RPi.GPIO as GPIO
-import sys
+# import RPi.GPIO as GPIO
+
 # sys.path.append("../lidar-vl53l0x")
 # import i2c0_lidar as distance
 
-sys.path.append("../step_test")
-import step_A4988_test1 as stepControl
+# sys.path.append("../step_test")
+# import step_A4988_test1 as stepControl
 
-HOST = '192.168.0.2'
+HOST = '192.168.0.218'
 PORT = 9999
 lock = allocate_lock()
 
@@ -20,13 +20,13 @@ client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 client_socket.connect((HOST, PORT))
 
 print ('>> Connect Server')
-# CONTROL SETUP PARAMS
+#CONTROL SETUP PARAMS
 STEPPIN = 29
 DIRPIN = 31
 ENPIN = 33
 FREQ= 60
 PINS = [STEPPIN,DIRPIN,ENPIN,35]
-stepControl.__SETUP__(PINS)
+# stepControl.__SETUP__(PINS)
 
 # 스레드로 구동 시켜, 메세지를 보내는 코드와 별개로 작동하도록 처리
 def send_data(client_socket) :
@@ -65,7 +65,7 @@ while True :
             print("processing==>")
             time.sleep(2)
             print(" "+first_move[0]+" "+first_move[1]+" "+first_move[2]+" "+first_move[3]+" "+first_move[4])
-            stepControl.__CONTORL__(first_move[0],STEPPIN,DIRPIN,ENPIN)
+            # stepControl.__CONTORL__(first_move[0],STEPPIN,DIRPIN,ENPIN)
 
             ##########################################
             # #라이다 거리 받아오는 코드
@@ -79,5 +79,5 @@ while True :
         print("error processing")
         break
 
-GPIO.cleanup()
+# GPIO.cleanup()
 client_socket.close() 
