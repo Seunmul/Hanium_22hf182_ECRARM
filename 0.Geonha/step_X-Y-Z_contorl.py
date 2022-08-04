@@ -39,7 +39,7 @@ def __CONTROL_X__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
 
 def __CONTROL_Y__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
 
-    STEP = int(STEP)
+    STEP = int(STEP*9)
     GPIO.output(ENPIN, GPIO.LOW)  # set ENPIN LOW => start control
     print("__CONTROL_Y : START\n")
     for i in range(0, STEP):
@@ -85,9 +85,9 @@ if __name__ == "__main__":
 
     __SETUP__(PINS, FREQ)
 
-    GPIO.output(ENPIN_X, GPIO.LOW)  # set ENPIN LOW => start control
-    GPIO.output(ENPIN_Y, GPIO.LOW)  # set ENPIN LOW => start control
-    GPIO.output(ENPIN_Z, GPIO.LOW)  # set ENPIN LOW => start control
+    GPIO.output(ENPIN_X, GPIO.HIGH)
+    GPIO.output(ENPIN_Y, GPIO.HIGH)
+    GPIO.output(ENPIN_Z, GPIO.HIGH)
     print("start\n")
     try:
         while True:

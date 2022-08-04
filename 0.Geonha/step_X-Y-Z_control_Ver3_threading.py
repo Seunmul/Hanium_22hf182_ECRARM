@@ -34,7 +34,7 @@ def __SETUP__(PINS, FREQ=60, MOTOR_MODE=1):
 
 def __CONTROL_X__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
 
-    STEP = int(STEP)
+    STEP = int(STEP)*9
     GPIO.output(ENPIN, GPIO.LOW)  # set ENPIN LOW => start control
     print("__CONTROL_X : START")
     for i in range(0, STEP):
@@ -88,10 +88,15 @@ def __CONTROL_Z__(STEP, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
 
 # 각도=>스텝 수로 변환 // mode=>풀스텝 시 1, 하프스텝시 2 .... 마이크로스텝에 따라 8,16 ....
 def _DEGREE_TO_STEPS_(degree=360, mode=1):
+    DIR=GPIO.HIGH #DIRPIN==GPIO.HIGH => clockwise
+    if(int(degree)<0) :
+        degree=-int(degree)
+        DIR=GPIO.LOW
+
     # 소수첫째자리까지 스텝수 계산
     steps = round(float(degree)*(mode/1.8), 1)
     # 오차 방지를 위해 정수로 반올림
-    return int(round(steps, 0))
+    return int(round(steps, 0)),DIR
 
 
 if __name__ == "__main__":
@@ -102,7 +107,7 @@ if __name__ == "__main__":
     STEPPIN_Z, DIRPIN_Z, ENPIN_Z = 35, 37, 40
     # stepmoter contorl params
     MOTOR_MODE = 8
-    FREQ = 5000
+    FREQ = 10000
     PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X, STEPPIN_Y,
             DIRPIN_Y, ENPIN_Y, STEPPIN_Z, DIRPIN_Z, ENPIN_Z]
     # 구동 간 sleep타임
@@ -111,14 +116,15 @@ if __name__ == "__main__":
     PULSE_LEVEL_TIME = __SETUP__(PINS, FREQ, MOTOR_MODE)
 
     # set ENPIN LOW => start control
-    GPIO.output(ENPIN_X, GPIO.LOW)
-    GPIO.output(ENPIN_Y, GPIO.LOW)
-    GPIO.output(ENPIN_Z, GPIO.LOW)
+    GPIO.output(ENPIN_X, GPIO.HIGH)
+    GPIO.output(ENPIN_Y, GPIO.HIGH)
+    GPIO.output(ENPIN_Z, GPIO.HIGH)
     print("start\n")
     try:
         while True:
-            # 사용자 입력 받기
-            STEPS = _DEGREE_TO_STEPS_(degree=input(
+
+            # 사용자 입력 받기 #STEPS=>각도에 따른 스텝 수, DIR=>DIR핀 clockwise or counterclockwise
+            STEPS , DIR = _DEGREE_TO_STEPS_(degree=input(
                 "각도를 입력하세요(0-360) : "), mode=MOTOR_MODE)
             print("steps : "+str(STEPS))
 
@@ -126,19 +132,19 @@ if __name__ == "__main__":
             start_time = time.time()
 
             #__CONTROL _X:THREAD
-            GPIO.output(DIRPIN_X, GPIO.HIGH)
+            GPIO.output(DIRPIN_X, DIR)
             X_axis = Thread(name="X_axis", target=__CONTROL_X__, args=(STEPS, STEPPIN_X,
                           DIRPIN_X, ENPIN_X, PULSE_LEVEL_TIME))
             print(X_axis.name)
 
             #__CONTROL _Y:THREAD
-            GPIO.output(DIRPIN_X, GPIO.HIGH)
+            GPIO.output(DIRPIN_Y, DIR)
             Y_axis = Thread(name="Y_axis", target=__CONTROL_Y__, args=(STEPS, STEPPIN_Y,
                           DIRPIN_Y, ENPIN_Y, PULSE_LEVEL_TIME))
             print(Y_axis.name)
 
             #__CONTROL _Z:THREAD
-            GPIO.output(DIRPIN_X, GPIO.HIGH)
+            GPIO.output(DIRPIN_Z, DIR)
             Z_axis = Thread(name="Z_axis", target=__CONTROL_Z__, args=(STEPS, STEPPIN_Z,
                           DIRPIN_Z, ENPIN_Z, PULSE_LEVEL_TIME))
             print(Z_axis.name)
@@ -157,7 +163,7 @@ if __name__ == "__main__":
 
             #stop
             print("stop")
-            time.sleep(3)
+            # time.sleep(3)
             print("restart\n-----\n")
 
     except KeyboardInterrupt:
