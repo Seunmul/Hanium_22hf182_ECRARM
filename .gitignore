@@ -5,7 +5,8 @@
 /.pnp
 .pnp.js
 *.ini
-
+node_modules/
+Web_control_interface/flask_back/static/legacy/assets/
 # testing
 /coverage
 
