@@ -1,5 +1,15 @@
 # Flask / Jinja2
 
 ---
-Flask와 Jinja2를 사용한 API 서버 구축 + html소스 렌더링을 통해
-웹 기반 인터페이스 구축
+## Flask와 Jinja2를 사용한 백엔드 서버 구축
+=> WebSocket으로 프론트와 실시간 동기화
+
+## React로 프론트엔드 구축
+
+## 디렉토리 구성
+flask_back
+reack-front
+
+---
+## 목표 : 웹 기반 인터페이스 구축 
+원격 라즈베리파이 GPIO제어
