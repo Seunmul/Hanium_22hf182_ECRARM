@@ -24,23 +24,35 @@ def thread_2(number):
         shared_number += 1
     lock.release() # thread_2 해제
 
+
+
+def foo(bar):
+    print('hello {}'.format(bar))
+    return 'foo'
+
+
 if __name__ == "__main__":
 
-    threads = [ ]
+    # threads = [ ]
 
-    start_time = time.time()
-    t1 = threading.Thread( target= thread_1, args=(500,) )
-    t1.start()
-    threads.append(t1)
+    # start_time = time.time()
+    # t1 = threading.Thread( target= thread_1, args=(500,) )
+    # t1.start()
+    # threads.append(t1)
 
-    t2 = threading.Thread( target= thread_2, args=(500,) )
-    t2.start()
-    threads.append(t2)
+    # t2 = threading.Thread( target= thread_2, args=(500,) )
+    # t2.start()
+    # threads.append(t2)
 
-    for t in threads:
-        t.join()
+    # for t in threads:
+    #     t.join()
 
-    print("--- %s seconds ---" % (time.time() - start_time))
+    # print("--- %s seconds ---" % (time.time() - start_time))
 
     print("shared_number=",end=""), print(shared_number)
+
+    thread = threading.Thread(target=foo, args=('world!',))
+    thread.start()
+    return_value = thread.join()
+
     print("end of main")
