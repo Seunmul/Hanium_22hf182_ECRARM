@@ -1,4 +1,4 @@
-import Rpi.__Motor_Control__ as CONTROL
+import __Motor_Control__ as CONTROL
 
 # Import python Internal library
 import time
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             start_time = time.time()
 
             # __CONTROL__ THREAD : X ,Y, Z, W, R
-            X_axis = Thread(name="X_axis", target=CONTROL._STEP_CONTROL_, args=("X", steps, dir, STEPPIN_X,
+            X_axis = Thread(name="X_axis", target=CONTROL._STEP_CONTROL_, args=("X", steps*9, dir, STEPPIN_X,
                                                                              DIRPIN_X, ENPIN_X, STEP_PULSE_LEVEL_TIME))
             Y_axis = Thread(name="Y_axis", target=CONTROL._STEP_CONTROL_, args=("Y", steps, dir, STEPPIN_Y,
                                                                              DIRPIN_Y, ENPIN_Y, STEP_PULSE_LEVEL_TIME))

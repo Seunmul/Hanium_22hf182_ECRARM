@@ -43,7 +43,7 @@ def _STEP_CONTROL_(AXIS, steps, dir, STEPPIN, DIRPIN, ENPIN, STEP_PULSE_LEVEL_TI
         GPIO.output(STEPPIN, GPIO.HIGH)
         time.sleep(STEP_PULSE_LEVEL_TIME)
     print("CONTROL %s : END" % (AXIS))
-    # GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    
 
     return
 
