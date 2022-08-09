@@ -9,8 +9,11 @@ from adafruit_pca9685 import PCA9685  # Import the PCA9685 module.
 # Import python Internal library
 import time
 from threading import Thread
+from queue import Queue
 
 # STEP ---------------------------------------------------------
+
+
 def _STEP_SETUP_(PINS, FREQ=60, MOTOR_MODE=1):
     print("\nSTEPMOTOR | setup.....")
     # set GPIO mode => BOARD, BOARD GPIO = physical GPIO
@@ -60,6 +63,7 @@ def _DEGREE_TO_STEPS_(degree=360, mode=1):
     return round(float(degree)*(mode/1.8), 0), dir
 
 
+# SERVO---------------------------------------------------------
 def _DEGREE_TO_PWM_(interval, min_pwm, degree):
     pwm = min_pwm + (interval*180) if degree > 180 else min_pwm + \
         (interval*degree)
@@ -71,75 +75,76 @@ def _SERVO_SETUP_(MIN, MAX):
     print("%f %d %d\n" % (degree_per_interval, MIN, MAX))
     return degree_per_interval, MIN, MAX
 
-# SERVO---------------------------------------------------------
 
-def _SERVO_MIN_PWM_(PCA, channel_num, cur_pwms, min_pwm, interval):
-    print("min_pwm")
-    cur_pwm = cur_pwms[channel_num]
+def _SERVO_TO_MIN_PWM_(AXIS, PCA, channel_num, cur_degree, min_pwm, interval):
+    print("MIN PWM %sAXIS " % (AXIS))
+    cur_pwm = _DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
     while cur_pwm > min_pwm:
         cur_pwm = cur_pwm - \
             interval if((cur_pwm-interval) > min_pwm) else min_pwm
         PCA.channels[channel_num].duty_cycle = int(cur_pwm)
         time.sleep(0.001)
-    cur_pwms[channel_num] = cur_pwm
-    print("stop")
     return cur_pwm
 
 
-def _SERVO_MAX_PWM_(PCA, channel_num, cur_pwms, max_pwm, interval):
-    cur_pwm = cur_pwms[channel_num]
-    print("max_pwm")
+def _SERVO_TO_MAX_PWM_(AXIS, PCA, channel_num, cur_degree, min_pwm, max_pwm, interval):
+    print("MAX PWM %sAXIS " % (AXIS))
+    cur_pwm = _DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
     while cur_pwm < max_pwm:
         cur_pwm = cur_pwm + \
             interval if((cur_pwm+interval) < max_pwm) else max_pwm
         PCA.channels[channel_num].duty_cycle = int(cur_pwm)
         time.sleep(0.001)
-    cur_pwms[channel_num] = cur_pwm
-    print("stop")
     return cur_pwm
 
 
-def _SERVO_INITIAL_(PCA, cur_pwms, min_pwm, max_pwm, interval):
-    
-    W_axis_MIN = Thread(
-        name="W_axis_MIN", target=_SERVO_MIN_PWM_, args=(PCA, 0, cur_pwms, min_pwm, interval))
-    W_axis_MAX = Thread(
-        name="W_axis_MAX", target=_SERVO_MAX_PWM_, args=(PCA, 0, cur_pwms, max_pwm, interval))
-    R_axis_MIN = Thread(
-        name="R_axis_MIN", target=_SERVO_MIN_PWM_, args=(PCA, 1, cur_pwms, min_pwm, interval))
-    R_axis_MAX = Thread(
-        name="R_axis_MAX", target=_SERVO_MAX_PWM_, args=(PCA, 1, cur_pwms, max_pwm, interval))
-    # thread start and join
-    W_axis_MIN.start()
-    R_axis_MIN.start()
-    W_axis_MIN.join()
-    R_axis_MIN.join()
+def _SERVO_INITIAL_(AXIS, PCA, channel_num, cur_degree, min_pwm, max_pwm, interval):
+    print("INITALIZE %sAXIS " % (AXIS))
+    cur_pwm = _SERVO_TO_MIN_PWM_(
+        AXIS, PCA, channel_num, cur_degree, min_pwm, interval)
     time.sleep(1)
-    W_axis_MAX.start()
-    R_axis_MAX.start()
-    W_axis_MAX.join()
-    R_axis_MAX.join()
+    cur_pwm = _SERVO_TO_MAX_PWM_(
+        AXIS, PCA, channel_num, cur_degree, min_pwm, max_pwm, interval)
+    print("\ninitial pwms : %s" % (cur_pwm))
 
-    print("\ninitial pwms : "+str(cur_pwms))
-    
     return
 
 
-def _SERVO_CONTROL_(PCA, channel_num, cur_pwms, interval, degree_pwm):
-    cur_pwm = cur_pwms[channel_num]
-    print("목표 pwm : %d" % (degree_pwm))
-    if(cur_pwm < degree_pwm):
-        while cur_pwm < degree_pwm:
+def _SERVO_CONTROL_(AXIS, PCA, channel_num, cur_degree, min_pwm, interval, target_degree):
+    print("CONTROL %s : START" % (AXIS))
+    cur_pwm = _DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
+    target_pwm = _DEGREE_TO_PWM_(interval, min_pwm, target_degree)
+    print("현재 | 목표 pwm :  %d | %d" % (cur_pwm, target_pwm))
+    if(cur_pwm < target_pwm):
+        while cur_pwm < target_pwm:
             cur_pwm = cur_pwm + interval \
-                if((cur_pwm + interval) < degree_pwm) else degree_pwm
+                if((cur_pwm + interval) < target_pwm) else target_pwm
             PCA.channels[channel_num].duty_cycle = int(cur_pwm)
             time.sleep(0.005)
-    elif(cur_pwm > degree_pwm):
-        while cur_pwm > degree_pwm:
+    elif(cur_pwm > target_pwm):
+        while cur_pwm > target_pwm:
             cur_pwm = cur_pwm - interval \
-                if((cur_pwm-interval) > degree_pwm) else degree_pwm
+                if((cur_pwm-interval) > target_pwm) else target_pwm
             PCA.channels[channel_num].duty_cycle = int(cur_pwm)
             time.sleep(0.005)
-    print("stop")
-    cur_pwms[channel_num] = cur_pwm
+    print("CONTROL %s : END" % (AXIS))
     return cur_pwm
+
+
+# class
+class MOTOR:
+
+    BUSIO.I2C(SCL, SDA)
+    PCA = PCA9685(I2C_BUS)  # Create a simple PCA9685 class instance.
+    PCA.frequency = 60  # Set the PWM frequency to 60hz.
+
+    STEPPIN_X, DIRPIN_X, ENPIN_X = 5, 6, 13  # BOARD 29 31 33
+    STEPPIN_Y, DIRPIN_Y, ENPIN_Y = 12, 16, 20  # BOARD 32 36 38
+    STEPPIN_Z, DIRPIN_Z, ENPIN_Z = 19, 26, 21  # BOARD 35 37 40
+    MOTOR_MODE_PIN = 14  # BOARD : 8
+    VCC = 15  # BOARD : 10
+    MOTOR_MODE = 8
+    FREQ = 5000
+    PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X,
+            STEPPIN_Y, DIRPIN_Y, ENPIN_Y,
+            STEPPIN_Z, DIRPIN_Z, ENPIN_Z, ]
