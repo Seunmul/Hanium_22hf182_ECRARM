@@ -38,7 +38,7 @@ def threaded(client_socket, addr):
     client_socket.close()
 
 # 서버 IP 및 열어줄 포트
-HOST = '192.168.0.5'
+HOST = '192.168.0.2'
 PORT = 9999
 
 # 서버 소켓 생성
@@ -51,14 +51,14 @@ server_socket.listen()
 try:
     while True:
         print('>> Wait')
-
         client_socket, addr = server_socket.accept()
         client_sockets.append(client_socket)
         start_new_thread(threaded, (client_socket, addr))
         print("참가자 수 : ", len(client_sockets))
 
-except Exception as e :
-    print ('에러는? : ',e)
+# except Exception as e :
+#     print ('에러는? : ',e)
+#     sys.exit()    
 
 finally:
     server_socket.close()
