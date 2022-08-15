@@ -2,15 +2,16 @@ import React, { useEffect, useState, useRef } from "react";
 
 const SocketTest = () => {
   const [socketConnected, setSocketConnected] = useState(false);
+  const [recivedMsg, setRecivedMsg] = useState(false);
   const [sendMsg, setSendMsg] = useState(false);
   const [isDetectionRunning, setDetectionRunning] = useState(false);
   const [items, setItems] = useState([]);
 
-  const webSocketUrl = `ws://localhost:8888`;
+  const webSocketUrl = `ws://192.168.0.13:8888`;
   let ws = useRef(null);
 
-  const startButtonClickHandler = () => {
-    if (socketConnected) {
+  const startButtonClickHandler = async () => {
+    if (socketConnected && recivedMsg) {
       ws.current.send(
         JSON.stringify({
           id: "WEB",
@@ -18,17 +19,20 @@ const SocketTest = () => {
         })
       );
       setDetectionRunning(true);
+      setRecivedMsg(false);
     }
   };
-  const stopButtonClickHandler = () => {
-    if (socketConnected) {
-      ws.current.send(
+  const stopButtonClickHandler = async () => {
+    if (socketConnected && recivedMsg) {
+      // print(ws.current.onmessage)
+      await ws.current.send(
         JSON.stringify({
           id: "WEB",
           message: "Stop",
         })
       );
       setDetectionRunning(false);
+      setRecivedMsg(false);
     }
   };
   // 소켓 객체 생성
@@ -49,8 +53,9 @@ const SocketTest = () => {
         console.log(error);
       };
       ws.current.onmessage = (evt) => {
-        const data = JSON.parse(evt.data);
+        const data = evt.data;
         console.log(data);
+        setRecivedMsg((prev) => data);
         setItems((prevItems) => [...prevItems, data]);
       };
     }
@@ -74,20 +79,25 @@ const SocketTest = () => {
     }
   }, [socketConnected]);
 
+  const detectionControlBtn =
+    !isDetectionRunning && recivedMsg ? (
+      <button style={{ color: "blue" }} onClick={startButtonClickHandler}>
+        start
+      </button>
+    ) : (
+      <button style={{ color: "red" }} onClick={stopButtonClickHandler}>
+        stop
+      </button>
+    );
   return (
     <>
       <div>socket connected : {`${socketConnected}`}</div>
       <div>res : </div>
       <div>
-      {!isDetectionRunning ? (
-          <button onClick={startButtonClickHandler}>start</button>
-        ) : (
-          <button onClick={stopButtonClickHandler}>stop</button>
-        )}
+        {socketConnected&&detectionControlBtn}
         {items.map((item, index) => {
           return <div key={index}>{JSON.stringify(item)}</div>;
         })}
-
       </div>
     </>
   );
