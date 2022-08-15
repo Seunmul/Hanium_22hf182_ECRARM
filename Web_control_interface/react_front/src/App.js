@@ -7,6 +7,7 @@ function App() {
     <div className="App">
       <button>start</button>
       <button>stop</button>
+      <div></div>
       <SocketTest></SocketTest>
     </div>
   );
