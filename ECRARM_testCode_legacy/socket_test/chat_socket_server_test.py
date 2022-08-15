@@ -68,18 +68,19 @@ def send_srv_msg():
         client.send(message.encode())
     
 try:
-    print('>> Wait')
-    client_socket, addr = server_socket.accept()
-    client_sockets.append(client_socket)
-    print("참가자 수 : ", len(client_sockets))
+    # print('>> Wait')
+    # client_socket, addr = server_socket.accept()
+    # client_sockets.append(client_socket)
+    # print("참가자 수 : ", len(client_sockets))
     while True:
-        send_srv_msg()
+        # send_srv_msg()
         print("processing task -- \n")
-        # print('>> Wait')
-        # client_socket, addr = server_socket.accept()
-        # client_sockets.append(client_socket)
-        # # start_new_thread(threaded, (client_socket, addr))
-        # print("참가자 수 : ", len(client_sockets))
+        
+        print('>> Wait')
+        client_socket, addr = server_socket.accept()
+        client_sockets.append(client_socket)
+        start_new_thread(threaded, (client_socket, addr))
+        print("참가자 수 : ", len(client_sockets))
 except Exception as e :
     print ('에러는? : ',e)
 

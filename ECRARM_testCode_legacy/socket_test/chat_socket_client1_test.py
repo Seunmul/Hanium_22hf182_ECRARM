@@ -18,7 +18,7 @@ def recv_data(client_socket) :
         print("from server recive : ",repr(data.decode()))
 
 
-# start_new_thread(recv_data, (client_socket,))
+start_new_thread(recv_data, (client_socket,))
 print ('>> Connect Server')
 client_socket.send("client connected, send msg".encode())
 while True:
@@ -27,14 +27,14 @@ while True:
     if data.decode() == 'quit':
         client_socket.send('closed, press any key'.encode())
         break
-    message = str('done')
+    # message = str('done')
     # if message == 'quit':
     #     close_data = message
     #     break
-    print("processing==>")
-    time.sleep(3)
-    print("end==>\n")
-    client_socket.send(message.encode())
+    # print("processing==>")
+    # time.sleep(3)
+    # print("end==>\n")
+    # client_socket.send(message.encode())
 
 
 client_socket.close()

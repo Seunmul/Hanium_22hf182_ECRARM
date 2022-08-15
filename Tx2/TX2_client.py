@@ -28,8 +28,16 @@ def send_data(client_socket) :
         # 이미지 인식 후 인식된 값이 있어야 함
         # 오류로 인한, 소자를 순간적으로 인식하지 못하는, 프로세스 종료를 막기 위한 방안이 필요
         # if num_objects == 0 : or file 에서 받아오는 값이 없다면 실행하는 것도 괜찮을 듯
-        # if B == 2 :
-        if B ==  10:
+        # if B ==  10:
+
+        # with open('element.txt', 'r') as f :
+        #     try : 
+	    #         message = f.readline()
+        #     except :
+        #         client_socket.send("stop".encode()) 
+        #         return
+
+        if B == 2 :
             client_socket.send("stop".encode()) # stop 을 보내면 다른
             print("no element found")
             with lock:
@@ -39,13 +47,15 @@ def send_data(client_socket) :
         B=B+1    
 
         #이미지 인식 및 좌표값 및 종류 획득
-        #반복문으로 이 부분 처리, 잡히는 물체가 없으면 continue, 있으면 send
-        # while True: 
-        if A % 2 == 0:
-            message = '800 5 44 85 62'
+        if A == 0:
+            message = '-360 -180 -180 -90 -90'
+        elif A==1 :
+            message = '360 180 180 90 90'
+        elif A==2 :
+            message = '-180 -90 -90 -45 -45'
         else :
-            message = '400 12 19 55 5'
-        A = ( A % 2 ) + 1     
+            message = '180 90 90 45 45'
+        A = ( A % 4 ) + 1     
         client_socket.send(message.encode())      
     return          
 
