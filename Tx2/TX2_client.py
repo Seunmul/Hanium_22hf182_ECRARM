@@ -7,7 +7,8 @@ g_stop_sig = True
 A = 0   
 B = 0
 
-HOST = '192.168.0.165'
+# HOST = '192.168.0.165'
+HOST = '192.168.0.2'
 PORT = 9999
 lock = allocate_lock()
 
@@ -27,7 +28,8 @@ def send_data(client_socket) :
         # 이미지 인식 후 인식된 값이 있어야 함
         # 오류로 인한, 소자를 순간적으로 인식하지 못하는, 프로세스 종료를 막기 위한 방안이 필요
         # if num_objects == 0 : or file 에서 받아오는 값이 없다면 실행하는 것도 괜찮을 듯
-        if B == 2 :
+        # if B == 2 :
+        if B ==  10:
             client_socket.send("stop".encode()) # stop 을 보내면 다른
             print("no element found")
             with lock:
