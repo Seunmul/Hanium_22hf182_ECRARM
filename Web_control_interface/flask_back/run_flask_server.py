@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request
-import datetime
+from flask import Flask, render_template
+
 app = Flask(__name__)
 
 @app.route("/")
@@ -18,8 +18,8 @@ def home():
 def status():
     return render_template("status.html")
 
-@app.route("/react")
-def my_index():
+@app.route("/index")
+def index():
     return render_template("index.html", flask_token="react  ")
 
 
