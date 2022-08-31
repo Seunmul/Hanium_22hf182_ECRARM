@@ -34,7 +34,7 @@ def socket_threaded(client_socket, addr):
 
 
 # 서버 IP 및 열어줄 포트
-HOST = '127.0.0.1'
+HOST = '155.230.25.98'
 PORT = 9999
 
 try:
