@@ -1,7 +1,11 @@
 import socket
 from _thread import *
 
+<<<<<<< HEAD
+HOST = '192.168.0.13'
+=======
 HOST = '127.0.0.1'
+>>>>>>> refs/remotes/origin/main
 PORT = 9999
 
 client_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
