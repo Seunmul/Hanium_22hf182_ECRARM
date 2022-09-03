@@ -8,7 +8,7 @@ A = 0
 B = 0
 
 # HOST = '192.168.0.165'
-HOST = '192.168.0.2'
+HOST = '192.168.0.13'
 PORT = 9999
 lock = allocate_lock()
 
