@@ -1,10 +1,16 @@
 import socket
 from threading import Thread
 import json
+from dataformat import *
 
 clientList = []  # 서버에 접속한 클라이언트 목록
 # 쓰레드에서 실행되는 코드입니다.
 # 접속한 클라이언트마다 새로운 쓰레드가 생성되어 통신을 하게 됩니다.
+
+# print(sys_status)
+# print(type(sys_status))
+print(ECRARM_STATUS)
+# print(type(ECRARM_STATUS))
 
 def socket_threaded(client, addr):
     print(f'>> Connected by : [{addr[0]}, {addr[1]}]')
@@ -20,7 +26,6 @@ def socket_threaded(client, addr):
             tempData=json.loads(recivedData.decode())
    
             if(tempData["from"]=="Web") :
-                
                 sendingData = json.dumps({
                     "ip" : tempData["ip"],
                     "from" : tempData["from"],
