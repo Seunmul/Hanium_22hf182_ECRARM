@@ -9,7 +9,7 @@ clientList = []  # 서버에 접속한 클라이언트 목록
 
 # print(sys_status)
 # print(type(sys_status))
-print(ECRARM_STATUS)
+# print(ECRARM_STATUS)
 # print(type(ECRARM_STATUS))
 
 def socket_threaded(client, addr):
@@ -24,20 +24,26 @@ def socket_threaded(client, addr):
             if not recivedData:
                 raise ConnectionResetError()
             tempData=json.loads(recivedData.decode())
-   
-            if(tempData["from"]=="Web") :
-                sendingData = json.dumps({
-                    "ip" : tempData["ip"],
-                    "from" : tempData["from"],
-                    "msg" : tempData["msg"]
-                },sort_keys=True,indent=4)
-            else :    
+            
+            if(tempData["from"]=="Controller") :  
                 sendingData = json.dumps({
                     "ip" : [str(addr[0]), addr[1]],
                     "from" : tempData["from"],
-                    "msg" : tempData["msg"]
+                    "data" : tempData["data"]
                 },sort_keys=True,indent=4)
-
+            elif(tempData["from"]=="Detector") :  
+                sendingData = json.dumps({
+                    "ip" : [str(addr[0]), addr[1]],
+                    "from" : tempData["from"],
+                    "data" : tempData["data"]
+                },sort_keys=True,indent=4)
+            elif(tempData["from"]=="Web") :
+                sendingData = json.dumps({
+                    "ip" : tempData["ip"],
+                    "from" : tempData["from"],
+                    "data" : tempData["data"]
+                },sort_keys=True,indent=4)
+            UPDATE_ECRARM_STATUS(tempData["from"], "data", tempData["data"])
             # print(f">> Received : \n{sendingData}")
             # 서버에 접속한 클라이언트들에게 채팅 보내기
             # 메세지를 보낸 본인을 제외한 서버에 접속한 클라이언트에게 메세지 보내기

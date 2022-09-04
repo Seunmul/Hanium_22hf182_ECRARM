@@ -42,7 +42,7 @@ ECRARM_STATUS = {
 #
 
 
-def UPDATE_STATUS(FROM: str, UpdateType: str, DATA: str):
+def UPDATE_ECRARM_STATUS(FROM: str, UpdateType: str, DATA: str):
     update = True
     if UpdateType == "connect":
         if FROM == "Controller":
@@ -52,7 +52,7 @@ def UPDATE_STATUS(FROM: str, UpdateType: str, DATA: str):
         elif FROM == "Web":
             ECRARM_STATUS["Web"]["connect"] = DATA
         else:
-            print(f'no match UpdateType')
+            print(f'no match FROM')
             return
         print(
             f'>> connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
@@ -64,7 +64,7 @@ def UPDATE_STATUS(FROM: str, UpdateType: str, DATA: str):
         elif FROM == "Web":
             ECRARM_STATUS["Web"]["data"] = DATA
         else:
-            print(f'no match UpdateType')
+            print(f'no match FROM')
             return
         print(f'>> data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     else:
@@ -74,5 +74,5 @@ def UPDATE_STATUS(FROM: str, UpdateType: str, DATA: str):
 
 if (__name__ == "__main__"):
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
-    UPDATE_STATUS("Detector", "connect", False)
+    UPDATE_ECRARM_STATUS("Detector", "connect", False)
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
