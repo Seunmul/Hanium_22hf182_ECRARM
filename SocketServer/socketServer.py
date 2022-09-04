@@ -7,9 +7,9 @@ clientList = []  # 서버에 접속한 클라이언트 목록
 # 접속한 클라이언트마다 새로운 쓰레드가 생성되어 통신을 하게 됩니다.
 
 def socket_threaded(client, addr):
-    print('>> Connected by :', addr[0], ':', addr[1])
-    print(">> Current Sockets : ", len(clientList))
-    print('>> Waiting...')
+    print(f'>> Connected by : [{addr[0]}, {addr[1]}]')
+    print(f'>> Current Sockets : {len(clientList)}')
+    print(f'>> Waiting...')
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
     try :
         while True:
@@ -18,17 +18,24 @@ def socket_threaded(client, addr):
             if not recivedData:
                 raise ConnectionResetError()
             tempData=json.loads(recivedData.decode())
-            sendingData = json.dumps({
-                "ip" : str(addr[0])+ ':'+ str(addr[1]),
-                "from" : tempData["from"],
-                "msg" : tempData["msg"]
-            },sort_keys=True,indent=4)
+   
+            if(tempData["from"]=="Web") :
+                
+                sendingData = json.dumps({
+                    "ip" : tempData["ip"],
+                    "from" : tempData["from"],
+                    "msg" : tempData["msg"]
+                },sort_keys=True,indent=4)
+            else :    
+                sendingData = json.dumps({
+                    "ip" : [str(addr[0]), addr[1]],
+                    "from" : tempData["from"],
+                    "msg" : tempData["msg"]
+                },sort_keys=True,indent=4)
 
-            # print('>> Received from ' + addr[0], ':', addr[1], str(sendingData))
-            print(f">> Received : \n{sendingData}")
+            # print(f">> Received : \n{sendingData}")
             # 서버에 접속한 클라이언트들에게 채팅 보내기
             # 메세지를 보낸 본인을 제외한 서버에 접속한 클라이언트에게 메세지 보내기
-            # sendingData = str(addr[0])+ ':'+ str(addr[1])+ str(sendingData)
             
             for currentClient in clientList:
                 if currentClient != client:
@@ -37,15 +44,15 @@ def socket_threaded(client, addr):
     except ConnectionResetError as e:
         if client in clientList:
             clientList.remove(client)
-            print(f'>> Disconnected by {addr[0]} : {addr[1]}')
+            print(f'>> Disconnected by [{addr[0]} , {addr[1]}]')
             print(f'>> Current Sockets : {len(clientList)}')
             print(f'>> Waiting...')
 
 
 
 # 서버 IP 및 열어줄 포트
-# HOST = '155.230.25.98'
-HOST = '127.0.0.1'
+HOST = '155.230.25.98'
+# HOST = '127.0.0.1'
 PORT = 9999
 
 try:

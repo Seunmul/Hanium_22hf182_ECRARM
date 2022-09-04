@@ -2,8 +2,8 @@ import socket
 from threading import Thread
 import json
 
-# HOST = '155.230.25.98'
-HOST = '127.0.0.1'
+HOST = '155.230.25.98'
+# HOST = '127.0.0.1'
 PORT = 9999
 
 client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)

@@ -30,7 +30,7 @@ while True:
         break
 
     sendingData = json.dumps({
-        "from" : "detector(Tx2)",
+        "from" : "controller(Tx2)",
         "msg" : sendingData
     },sort_keys=True,indent=4)
 

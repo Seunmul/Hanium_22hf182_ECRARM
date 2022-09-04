@@ -1,5 +1,6 @@
 import websockets
 import asyncio
+import json
 
 SOCKET_HOST = '155.230.25.98'
 SOCKET_PORT = 9999
@@ -16,19 +17,25 @@ async def socket_to_web(websocket, reader, writer):
     # 응답을 받으면 출력합니다.
     while True:
         # 서버로부터 받은 응답을 표시
-        message = await reader.read(1024)  # type
-        if not message: #받은 메세지가 없으면 루프 해제.
+        receivedData = await reader.read(1024)  # type
+        if not receivedData: #받은 메세지가 없으면 루프 해제.
             raise websockets.exceptions.ConnectionClosedError(" "," ")
-        print(f"[StW] received: {len(message)} bytes")
-        print(f"[StW] message: {message.decode()}")
-        await websocket.send(message.decode())
+        print(f"[StW] received: {len(receivedData)} bytes")
+        print(f"[StW] receivedData: {receivedData.decode()}")
+        await websocket.send(receivedData.decode())
 
 async def web_to_socket(websocket, reader, writer):
-    async for message in websocket:
-        print(f"[WtS] received: {len(message)} bytes")
-        print(f"[WtS] message: {message}")
-        writer.write(message.encode())
-        await websocket.send(message) #echo
+    async for receivedData in websocket:
+        print(f"[WtS] received: {len(receivedData)} bytes")
+        tempData=json.loads(receivedData)
+        sendingData = json.dumps({
+                "ip" : websocket.remote_address,
+                "from" : tempData["from"],
+                "msg" : tempData["msg"]
+            },sort_keys=True,indent=4)
+        print(f"[WtS] receivedData: {sendingData}")
+        writer.write(sendingData.encode())
+        await websocket.send(sendingData) #echo
 
 async def webSocketClosedHandler(websocket,writer):
     status=await websocket.wait_closed()
@@ -47,7 +54,7 @@ async def handler(websocket):
         reader, writer = await asyncio.open_connection(str(SOCKET_HOST), int(SOCKET_PORT))
         print(">> [C] Socket connected")
         WEB_CLIENTS.append(websocket.remote_address)
-        print(">> Current WEB_CLIENTS : ", len(WEB_CLIENTS))
+        print(f'>> Current WEB_CLIENTS : {len(WEB_CLIENTS)}\n')
         # asyncio와 쓰레드를 이용하여, 소켓서버와 웹소켓 서버로 부터 오고가는 데이터를 중계합니다.
         await asyncio.gather(
             await asyncio.to_thread(socket_to_web, websocket, reader, writer,),
@@ -55,12 +62,12 @@ async def handler(websocket):
             await asyncio.to_thread(webSocketClosedHandler,websocket,writer,)
         )
     except websockets.exceptions.ConnectionClosedOK as e:
-        print("새로고침되었습니다. IP : "+str(websocket.remote_address))
+        print(f'>> 새로고침되었습니다. IP : {str(websocket.remote_address)}')
         print(e)
     except websockets.exceptions.ConnectionClosedError as e:
         WEB_CLIENTS.remove(websocket.remote_address)
-        print("클라이언트와 연결이 끊겼습니다. 소켓서버와의 연결을 종료합니다. IP : "+str(websocket.remote_address))
-        print(">> Current WEB_CLIENTS : ", len(WEB_CLIENTS))
+        print(f'>> Disconnected, IP : {str(websocket.remote_address)}')
+        print(f'>> Current WEB_CLIENTS : {len(WEB_CLIENTS)}\n')
 
 
 async def main():

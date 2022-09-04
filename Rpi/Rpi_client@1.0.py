@@ -30,7 +30,7 @@ while True:
         break
 
     sendingData = json.dumps({
-        "from" : "detector(Rpi)",
+        "from" : "controller(RPI)",
         "msg" : sendingData
     },sort_keys=True,indent=4)
 
