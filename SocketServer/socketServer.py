@@ -13,9 +13,13 @@ clientList = []  # 서버에 접속한 클라이언트 목록
 # print(type(ECRARM_STATUS))
 
 def socket_threaded(client, addr):
-    print(f'>> Connected by : [{addr[0]}, {addr[1]}]')
+    print(f'\n>> Connected by : [{addr[0]}, {addr[1]}]')
     print(f'>> Current Sockets : {len(clientList)}')
-    print(f'>> Waiting...')
+    recivedData = json.loads(client.recv(1024).decode())
+    UPDATE_ECRARM_STATUS(str(addr),recivedData["from"], recivedData["data"], True)
+
+    recivedData= ""
+    print(f'>> Waiting...\n\n')
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
     try :
         while True:
@@ -24,7 +28,7 @@ def socket_threaded(client, addr):
             if not recivedData:
                 raise ConnectionResetError()
             tempData=json.loads(recivedData.decode())
-            
+            # print(f"\n>> Received : {tempData}")
             if(tempData["from"]=="Controller") :  
                 sendingData = json.dumps({
                     "ip" : [str(addr[0]), addr[1]],
@@ -43,21 +47,21 @@ def socket_threaded(client, addr):
                     "from" : tempData["from"],
                     "data" : tempData["data"]
                 },sort_keys=True,indent=4)
-            UPDATE_ECRARM_STATUS(tempData["from"], "data", tempData["data"])
-            # print(f">> Received : \n{sendingData}")
+            UPDATE_ECRARM_STATUS(str(addr),tempData["from"], "data", tempData["data"])
+ 
             # 서버에 접속한 클라이언트들에게 채팅 보내기
             # 메세지를 보낸 본인을 제외한 서버에 접속한 클라이언트에게 메세지 보내기
             
             for currentClient in clientList:
                 if currentClient != client:
-                    currentClient.send(sendingData.encode())
+                    currentClient.send(json.dumps(ECRARM_STATUS).encode())
 
     except ConnectionResetError as e:
         if client in clientList:
             clientList.remove(client)
-            print(f'>> Disconnected by [{addr[0]} , {addr[1]}]')
+            print(f'>> \nDisconnected by [{addr[0]} , {addr[1]}]')
             print(f'>> Current Sockets : {len(clientList)}')
-            print(f'>> Waiting...')
+            print(f'>> Waiting...\n\n')
 
 
 
@@ -76,7 +80,7 @@ try:
     
     # 클라이언트가 접속하면 accept 함수에서 새로운 소켓을 리턴합니다.
     # 새로운 쓰레드에서 해당 소켓을 사용하여 통신을 하게 됩니다.
-    print('>> Waiting...')
+    print('>> Waiting...\n\n')
 
     while True:
         client, addr = server.accept()

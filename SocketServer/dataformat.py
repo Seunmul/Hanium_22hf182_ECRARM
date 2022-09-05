@@ -6,9 +6,9 @@ sys_status = ["error", "initializing", "waiting",
 
 ECRARM_STATUS = {
     "status": sys_status[1],
-    "ip": "",
-    "from": "Web",  # Rpi,Tx2,Web
+    "from": "",  # Rpi,Tx2,Web
     "Detector": {
+        "ip": "",
         "connect": False,  # True or False
         "data": {
             "class": "none",
@@ -17,6 +17,7 @@ ECRARM_STATUS = {
         }
     },
     "Controller": {
+        "ip": "",
         "connect": False,  # True or False
         "data": {
             "X_Axis": 0,
@@ -27,6 +28,7 @@ ECRARM_STATUS = {
         }
     },
     "Web": {
+        "bridgeIp": "",
         "bridgeConnect": False,  # True or False
         "command": ""
     }
@@ -39,10 +41,11 @@ ECRARM_STATUS = {
 # ---
 # updateType : 업데이트 타입, connect와 data로 나눠짐
 # connect일 경우 연결 데이터만 업데이트, data일 경우 내부 데이터들을 업데이트
-#
+def SHOW_ECRARM_STATUS():
+    print(f">> Current Status : {json.dumps(ECRARM_STATUS,sort_keys=True,indent=4)}")
+    return
 
-
-def UPDATE_ECRARM_STATUS(FROM: str, UpdateType: str, DATA: str):
+def UPDATE_ECRARM_STATUS(IP:str,FROM: str, UpdateType: str, DATA: str):
     update = True
     if UpdateType == "connect":
         if FROM == "Controller":
@@ -54,8 +57,9 @@ def UPDATE_ECRARM_STATUS(FROM: str, UpdateType: str, DATA: str):
         else:
             print(f'no match FROM')
             return
+    
         print(
-            f'>> connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
+            f'>> {IP} | connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     elif UpdateType == "data":
         if FROM == "Controller":
             ECRARM_STATUS["Controller"]["data"] = DATA
@@ -66,13 +70,15 @@ def UPDATE_ECRARM_STATUS(FROM: str, UpdateType: str, DATA: str):
         else:
             print(f'no match FROM')
             return
-        print(f'>> data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
+        
+        print(f'>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     else:
         print(f'no match UpdateType')
+    SHOW_ECRARM_STATUS()
     return
 
 
 if (__name__ == "__main__"):
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
-    UPDATE_ECRARM_STATUS("Detector", "connect", False)
+    UPDATE_ECRARM_STATUS("127.0.0.1","Detector", "connect", False)
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
