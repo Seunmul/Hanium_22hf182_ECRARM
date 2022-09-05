@@ -6,14 +6,13 @@ sys_status = ["error", "initializing", "waiting",
 
 ECRARM_STATUS = {
     "status": sys_status[1],
-    "from": "",  # Rpi,Tx2,Web
     "Detector": {
         "ip": "",
         "connect": False,  # True or False
         "data": {
             "class": "none",
-            "x": 0,
-            "y": 0
+            "accord_x": 0,
+            "accord_y": 0
         }
     },
     "Controller": {
@@ -34,6 +33,12 @@ ECRARM_STATUS = {
     }
 }
 
+
+def SHOW_ECRARM_STATUS():
+    print(
+        f"\n>> Current Status : {json.dumps(ECRARM_STATUS,sort_keys=True,indent=4)}")
+    return
+
 # FROM: 데이터 업데이트 주체,str타입
 # DATA: 업데이트되는 데이터, str타입으로 넣어주어야 하며,
 # updateType이 connect일 경우에는 True / False만
@@ -41,23 +46,23 @@ ECRARM_STATUS = {
 # ---
 # updateType : 업데이트 타입, connect와 data로 나눠짐
 # connect일 경우 연결 데이터만 업데이트, data일 경우 내부 데이터들을 업데이트
-def SHOW_ECRARM_STATUS():
-    print(f">> Current Status : {json.dumps(ECRARM_STATUS,sort_keys=True,indent=4)}")
-    return
 
-def UPDATE_ECRARM_STATUS(IP:str,FROM: str, UpdateType: str, DATA: str):
-    update = True
+
+def UPDATE_ECRARM_STATUS(IP: str, FROM: str, UpdateType: str, DATA: str):
     if UpdateType == "connect":
         if FROM == "Controller":
+            ECRARM_STATUS["Controller"]["ip"] = IP
             ECRARM_STATUS["Controller"]["connect"] = DATA
         elif FROM == "Detector":
+            ECRARM_STATUS["Detector"]["ip"] = IP
             ECRARM_STATUS["Detector"]["connect"] = DATA
         elif FROM == "Web":
+            ECRARM_STATUS["Web"]["bridgeIp"] = IP
             ECRARM_STATUS["Web"]["connect"] = DATA
         else:
             print(f'no match FROM')
             return
-    
+
         print(
             f'>> {IP} | connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     elif UpdateType == "data":
@@ -70,15 +75,34 @@ def UPDATE_ECRARM_STATUS(IP:str,FROM: str, UpdateType: str, DATA: str):
         else:
             print(f'no match FROM')
             return
-        
-        print(f'>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
+
+        print(
+            f'>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     else:
         print(f'no match UpdateType')
+
+    SHOW_ECRARM_STATUS()
+    return
+
+
+def DISCONNECT_AND_STATUS_UPDATE(IP):
+    if ECRARM_STATUS["Controller"]["ip"] == IP:
+        ECRARM_STATUS["Controller"]["ip"] = ""
+        ECRARM_STATUS["Controller"]["connect"] = False
+        print(">> Controller disconnected")
+    elif ECRARM_STATUS["Detector"]["ip"] == IP:
+        ECRARM_STATUS["Detector"]["ip"] = ""
+        ECRARM_STATUS["Detector"]["connect"] = False
+        print(">> Detector disconnected")
+    elif ECRARM_STATUS["Web"]["bridgeIp"] == IP:
+        ECRARM_STATUS["Web"]["ip"] = ""
+        ECRARM_STATUS["Web"]["connect"] = False
+        print(">> websocket server disconnected")
     SHOW_ECRARM_STATUS()
     return
 
 
 if (__name__ == "__main__"):
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
-    UPDATE_ECRARM_STATUS("127.0.0.1","Detector", "connect", False)
+    UPDATE_ECRARM_STATUS("127.0.0.1", "Detector", "connect", False)
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))

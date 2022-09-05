@@ -12,46 +12,49 @@ clientList = []  # 서버에 접속한 클라이언트 목록
 # print(ECRARM_STATUS)
 # print(type(ECRARM_STATUS))
 
+
 def socket_threaded(client, addr):
-    print(f'\n>> Connected by : [{addr[0]}, {addr[1]}]')
+    print(f'\n>> Connected by : [{addr}]')
     print(f'>> Current Sockets : {len(clientList)}')
     recivedData = json.loads(client.recv(1024).decode())
-    UPDATE_ECRARM_STATUS(str(addr),recivedData["from"], recivedData["data"], True)
-
-    recivedData= ""
+    UPDATE_ECRARM_STATUS(
+        str(addr), recivedData["from"], recivedData["data"], True)
+    recivedData = ""
     print(f'>> Waiting...\n\n')
+    for currentClient in clientList:
+        if currentClient != client:
+            currentClient.send(json.dumps(ECRARM_STATUS).encode())
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
-    try :
+    try:
         while True:
             # 데이터가 수신되면 클라이언트에 다시 전송합니다.(에코)
             recivedData = client.recv(1024)
             if not recivedData:
                 raise ConnectionResetError()
-            tempData=json.loads(recivedData.decode())
-            # print(f"\n>> Received : {tempData}")
-            if(tempData["from"]=="Controller") :  
+            tempData = json.loads(recivedData.decode())
+           
+            if (tempData["from"] == "Controller"):
                 sendingData = json.dumps({
-                    "ip" : [str(addr[0]), addr[1]],
-                    "from" : tempData["from"],
-                    "data" : tempData["data"]
-                },sort_keys=True,indent=4)
-            elif(tempData["from"]=="Detector") :  
+                    "ip": [str(addr[0]), addr[1]],
+                    "from": tempData["from"],
+                    "data": tempData["data"]
+                }, sort_keys=True, indent=4)
+            elif (tempData["from"] == "Detector"):
                 sendingData = json.dumps({
-                    "ip" : [str(addr[0]), addr[1]],
-                    "from" : tempData["from"],
-                    "data" : tempData["data"]
-                },sort_keys=True,indent=4)
-            elif(tempData["from"]=="Web") :
+                    "ip": [str(addr[0]), addr[1]],
+                    "from": tempData["from"],
+                    "data": tempData["data"]
+                }, sort_keys=True, indent=4)
+            elif (tempData["from"] == "Web"):
                 sendingData = json.dumps({
-                    "ip" : tempData["ip"],
-                    "from" : tempData["from"],
-                    "data" : tempData["data"]
-                },sort_keys=True,indent=4)
-            UPDATE_ECRARM_STATUS(str(addr),tempData["from"], "data", tempData["data"])
- 
-            # 서버에 접속한 클라이언트들에게 채팅 보내기
-            # 메세지를 보낸 본인을 제외한 서버에 접속한 클라이언트에게 메세지 보내기
-            
+                    "ip": tempData["ip"],
+                    "from": tempData["from"],
+                    "data": tempData["data"]
+                }, sort_keys=True, indent=4)
+            UPDATE_ECRARM_STATUS(
+                str(addr), tempData["from"], "data", tempData["data"])
+
+            # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
                 if currentClient != client:
                     currentClient.send(json.dumps(ECRARM_STATUS).encode())
@@ -59,10 +62,12 @@ def socket_threaded(client, addr):
     except ConnectionResetError as e:
         if client in clientList:
             clientList.remove(client)
-            print(f'>> \nDisconnected by [{addr[0]} , {addr[1]}]')
+            print(f'>> \nDisconnected by [{addr}]')
             print(f'>> Current Sockets : {len(clientList)}')
+            DISCONNECT_AND_STATUS_UPDATE(str(addr))
+            for currentClient in clientList:
+                currentClient.send(json.dumps(ECRARM_STATUS).encode())
             print(f'>> Waiting...\n\n')
-
 
 
 # 서버 IP 및 열어줄 포트
@@ -77,7 +82,7 @@ try:
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
     server.listen()
-    
+
     # 클라이언트가 접속하면 accept 함수에서 새로운 소켓을 리턴합니다.
     # 새로운 쓰레드에서 해당 소켓을 사용하여 통신을 하게 됩니다.
     print('>> Waiting...\n\n')
@@ -85,7 +90,8 @@ try:
     while True:
         client, addr = server.accept()
         clientList.append(client)
-        socketServer=Thread(name="socketServer", target=socket_threaded, args=(client, addr),daemon=True)
+        socketServer = Thread(
+            name="socketServer", target=socket_threaded, args=(client, addr), daemon=True)
         socketServer.start()
 except Exception as e:
     print('에러는? : ', e)

@@ -14,8 +14,8 @@ def send_detector_data(client, classType: str, accord_x: float, accord_y: float)
         "from": "Detector",
         "data": {
                 "class": classType,
-                "x": str(accord_x),
-                "y": str(accord_y)
+                "accord_x": str(accord_x),
+                "accord_y": str(accord_y)
         }
 
     }, sort_keys=True, indent=4)
@@ -57,6 +57,7 @@ if (__name__ == "__main__"):
         if sendingData == 'quit':
             print("exit client")
             break
-        send_detector_data(client, classType="resistor", accord_x=30, accord_y=20)
-        
+        send_detector_data(client, classType="resistor",
+                           accord_x=30, accord_y=20)
+
     client.close()

@@ -53,6 +53,7 @@ if (__name__ == "__main__"):
     socketClient = Thread(name="socketClient", target=recv_data,
                           args=(client,), daemon=True)
     socketClient.start()
+
     while True:
         inputData = input('')
         if inputData == 'quit':
