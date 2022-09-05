@@ -24,8 +24,6 @@ def send_detector_data(client, classType: str, accord_x: float, accord_y: float)
     return
 
 # connect 메시지 전송 및 이니셜라이즈
-
-
 def send_connect_msg(client):
     sendingData = json.dumps({
         "from": "Detector",

@@ -12,38 +12,44 @@ WEB_CLIENTS = []  # 서버에 접속한 클라이언트 목록
 
 # 서버로부터 메세지를 받는 메소드
 # 스레드로 구동 시켜, 메세지를 보내는 코드와 별개로 작동하도록 처리
+
+
 async def socket_to_web(websocket, reader, writer):
     # 루프를 돌면서 입력받은 내용을 서버로 보내고,
     # 응답을 받으면 출력합니다.
     while True:
         # 서버로부터 받은 응답을 표시
         receivedData = await reader.read(1024)  # type
-        if not receivedData: #받은 메세지가 없으면 루프 해제.
-            raise websockets.exceptions.ConnectionClosedError(" "," ")
-        print(f"[StW] received: {len(receivedData)} bytes")
+        if not receivedData:  # 받은 메세지가 없으면 루프 해제.
+            raise websockets.exceptions.ConnectionClosedError(" ", " ")
+        print(f"\n[StW] received: {len(receivedData)} bytes")
         print(f"[StW] receivedData: {receivedData.decode()}")
         await websocket.send(receivedData.decode())
 
+
 async def web_to_socket(websocket, reader, writer):
     async for receivedData in websocket:
-        print(f"[WtS] received: {len(receivedData)} bytes")
-        tempData=json.loads(receivedData)
+        print(f"\n[WtS] received: {len(receivedData)} bytes")
+        # tempData = json.loads(receivedData)
+        # print(tempData)
         sendingData = json.dumps({
-                "ip" : websocket.remote_address,
-                "from" : tempData["from"],
-                "msg" : tempData["msg"]
-            },sort_keys=True,indent=4)
+            "ip": websocket.remote_address,
+            "from": "Web",
+            "data": json.loads(receivedData)["data"]
+        }, sort_keys=True, indent=4)
         print(f"[WtS] receivedData: {sendingData}")
         writer.write(sendingData.encode())
-        await websocket.send(sendingData) #echo
+        # await websocket.send(sendingData)  # echo
 
-async def webSocketClosedHandler(websocket,writer):
-    status=await websocket.wait_closed()
+
+async def webSocketClosedHandler(websocket, writer):
+    status = await websocket.wait_closed()
     # print(status)
-    if(not status):
+    if (not status):
         writer.close()
         await writer.wait_closed()
-        
+
+
 async def handler(websocket):
     try:
         print(websocket.remote_address)
@@ -59,7 +65,7 @@ async def handler(websocket):
         await asyncio.gather(
             await asyncio.to_thread(socket_to_web, websocket, reader, writer,),
             await asyncio.to_thread(web_to_socket, websocket, reader, writer,),
-            await asyncio.to_thread(webSocketClosedHandler,websocket,writer,)
+            await asyncio.to_thread(webSocketClosedHandler, websocket, writer,)
         )
     except websockets.exceptions.ConnectionClosedOK as e:
         print(f'>> 새로고침되었습니다. IP : {str(websocket.remote_address)}')

@@ -29,7 +29,7 @@ ECRARM_STATUS = {
     "Web": {
         "bridgeIp": "",
         "bridgeConnect": False,  # True or False
-        "command": ""
+        "data": ""
     }
 }
 
@@ -58,13 +58,13 @@ def UPDATE_ECRARM_STATUS(IP: str, FROM: str, UpdateType: str, DATA: str):
             ECRARM_STATUS["Detector"]["connect"] = DATA
         elif FROM == "Web":
             ECRARM_STATUS["Web"]["bridgeIp"] = IP
-            ECRARM_STATUS["Web"]["connect"] = DATA
+            ECRARM_STATUS["Web"]["bridgeConnect"] = DATA
         else:
             print(f'no match FROM')
             return
 
         print(
-            f'>> {IP} | connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
+            f'\n>> {IP} | connection status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     elif UpdateType == "data":
         if FROM == "Controller":
             ECRARM_STATUS["Controller"]["data"] = DATA
@@ -77,12 +77,42 @@ def UPDATE_ECRARM_STATUS(IP: str, FROM: str, UpdateType: str, DATA: str):
             return
 
         print(
-            f'>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
+            f'\n>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     else:
         print(f'no match UpdateType')
 
-    SHOW_ECRARM_STATUS()
+    # SHOW_ECRARM_STATUS()
     return
+
+
+def SENDING_FORMAT(ECRARM_STATUS):
+    data = json.dumps({
+        "status": ECRARM_STATUS["status"],
+        "Detector": { 
+            "connect": ECRARM_STATUS["Detector"]["connect"],  # True or False
+            "data": {
+                "class": ECRARM_STATUS["Detector"]["data"]["class"],
+                "accord_x": ECRARM_STATUS["Detector"]["data"]["accord_x"],
+                "accord_y": ECRARM_STATUS["Detector"]["data"]["accord_y"]
+            }
+        },
+        "Controller": {
+            "connect": ECRARM_STATUS["Controller"]["connect"],  # True or False
+            "data": {
+                "X_Axis": ECRARM_STATUS["Controller"]["data"]["X_Axis"],
+                "Y_Axis": ECRARM_STATUS["Controller"]["data"]["Y_Axis"],
+                "Z_Axis": ECRARM_STATUS["Controller"]["data"]["Z_Axis"],
+                "W_Axis": ECRARM_STATUS["Controller"]["data"]["W_Axis"],
+                "R_Axis": ECRARM_STATUS["Controller"]["data"]["R_Axis"]
+            }
+        },
+        "Web": {
+            "bridgeConnect": ECRARM_STATUS["Web"]["bridgeConnect"],  # True or False
+            "data": ECRARM_STATUS["Web"]["data"]
+        }
+
+    })
+    return data
 
 
 def DISCONNECT_AND_STATUS_UPDATE(IP):
@@ -95,9 +125,9 @@ def DISCONNECT_AND_STATUS_UPDATE(IP):
         ECRARM_STATUS["Detector"]["connect"] = False
         print(">> Detector disconnected")
     elif ECRARM_STATUS["Web"]["bridgeIp"] == IP:
-        ECRARM_STATUS["Web"]["ip"] = ""
-        ECRARM_STATUS["Web"]["connect"] = False
-        print(">> websocket server disconnected")
+        ECRARM_STATUS["Web"]["bridgeIp"] = ""
+        ECRARM_STATUS["Web"]["bridgeConnect"] = False
+        print(">> websocket client")
     SHOW_ECRARM_STATUS()
     return
 

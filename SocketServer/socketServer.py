@@ -7,23 +7,17 @@ clientList = []  # 서버에 접속한 클라이언트 목록
 # 쓰레드에서 실행되는 코드입니다.
 # 접속한 클라이언트마다 새로운 쓰레드가 생성되어 통신을 하게 됩니다.
 
-# print(sys_status)
-# print(type(sys_status))
-# print(ECRARM_STATUS)
-# print(type(ECRARM_STATUS))
-
-
 def socket_threaded(client, addr):
     print(f'\n>> Connected by : [{addr}]')
     print(f'>> Current Sockets : {len(clientList)}')
     recivedData = json.loads(client.recv(1024).decode())
+    print(f'{recivedData}')
     UPDATE_ECRARM_STATUS(
         str(addr), recivedData["from"], recivedData["data"], True)
     recivedData = ""
     print(f'>> Waiting...\n\n')
     for currentClient in clientList:
-        if currentClient != client:
-            currentClient.send(json.dumps(ECRARM_STATUS).encode())
+        currentClient.send(SENDING_FORMAT(ECRARM_STATUS).encode())
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
     try:
         while True:
@@ -57,7 +51,7 @@ def socket_threaded(client, addr):
             # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
                 if currentClient != client:
-                    currentClient.send(json.dumps(ECRARM_STATUS).encode())
+                    currentClient.send(SENDING_FORMAT(ECRARM_STATUS).encode())
 
     except ConnectionResetError as e:
         if client in clientList:
@@ -66,7 +60,7 @@ def socket_threaded(client, addr):
             print(f'>> Current Sockets : {len(clientList)}')
             DISCONNECT_AND_STATUS_UPDATE(str(addr))
             for currentClient in clientList:
-                currentClient.send(json.dumps(ECRARM_STATUS).encode())
+                currentClient.send(SENDING_FORMAT(ECRARM_STATUS).encode())
             print(f'>> Waiting...\n\n')
 
 

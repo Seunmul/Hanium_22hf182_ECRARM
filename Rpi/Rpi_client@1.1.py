@@ -26,8 +26,6 @@ def send_controller_data(client, X: float, Y: float, Z: float, W: float, R: floa
     return
 
 # connect 메시지 전송 및 이니셜라이즈
-
-
 def send_connect_msg(client):
     sendingData = json.dumps({
         "from": "Controller",
