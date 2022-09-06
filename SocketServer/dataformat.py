@@ -73,7 +73,7 @@ def SHOW_ECRARM_STATUS(ECRARM_STATUS: dict):
 def UPDATE_SYS_STATUS(ECRARM_STATUS: dict, updatingStatus):
     connection_status = ECRARM_STATUS["Controller"]["connect"] and ECRARM_STATUS[
         "Detector"]["connect"] and ECRARM_STATUS["Web"]["bridgeConnect"]
-    print(updatingStatus)
+    # print(updatingStatus)
     if (not connection_status):
         ECRARM_STATUS["status"] = sys_status[1]
         print('>> [STATUS] initializing program ....')

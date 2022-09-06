@@ -66,8 +66,6 @@ def Controller_Client(client):
                                      X=10, Y=20, Z=30, W=40, R=50)
             elif (recivedData["status"] == "stopping"):
                 print("stopping...")
-                # recivedData = json.loads(client.recv(1024).decode())
-                # print(f"\n>> [C] received : \n{recivedData}")
                 time.sleep(3)
                 print("stopped")
                 

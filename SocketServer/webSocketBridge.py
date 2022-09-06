@@ -44,7 +44,7 @@ async def web_to_socket(websocket, reader, writer):
             sendingData = json.dumps({
                 "ip": websocket.remote_address,
                 "from": "Web",
-                "status": "connecting",
+                "status": "connect",
                 "data": data
             }, sort_keys=True, indent=4)
         elif (system_status == "waiting" and data == "start"):
