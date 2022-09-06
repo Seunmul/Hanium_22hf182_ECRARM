@@ -48,7 +48,7 @@ def Controller_Client(client):
         global recivedData
         # dictionary type으로 받기
         recivedData = json.loads(client.recv(1024).decode())
-        print(f"\n>> Received : \n{recivedData}")
+        print(f"\n>> [C] received : \n{recivedData}")
         if (recivedData["status"] == "detecting_finished"):
             print("do something...")
             # detecting 중인 것을 서버에다가 알려야함.

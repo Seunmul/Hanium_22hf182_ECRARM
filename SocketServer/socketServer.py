@@ -4,11 +4,11 @@ import json
 from dataformat import *
 
 clientList = []  # 서버에 접속한 클라이언트 목록
+
+
 # 쓰레드에서 실행되는 코드입니다.
 # 접속한 클라이언트마다 새로운 쓰레드가 생성되어 통신을 하게 됩니다.
-
-
-def socket_threaded(client, addr):
+def socket_thread(client, addr):
     print(f'\n>> Connected by : [{addr}]')
     print(f'>> Current Sockets : {len(clientList)}')
     recivedData = json.loads(client.recv(1024).decode())
@@ -16,6 +16,7 @@ def socket_threaded(client, addr):
     UPDATE_ECRARM_STATUS(ECRARM_STATUS,
                          str(addr), recivedData["from"], recivedData["data"], True)
     recivedData = ""
+    # 커넥션 시 명령.
     print(f'>> Waiting...\n\n')
     for currentClient in clientList:
         currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
@@ -51,8 +52,8 @@ def socket_threaded(client, addr):
 
             # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
-                if currentClient != client:
-                    currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
+                # if currentClient != client:
+                currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
 
     except ConnectionResetError as e:
         if client in clientList:
@@ -65,9 +66,7 @@ def socket_threaded(client, addr):
             print(f'>> Waiting...\n\n')
 
 # 서버 커맨드
-
-
-def server_command():
+def _command_():
     while True:
         inputData = input('')
         if inputData == 'close':
@@ -75,8 +74,10 @@ def server_command():
             break
         elif inputData == 'status':
             SHOW_ECRARM_STATUS(ECRARM_STATUS)
-        elif inputData == 'initialize':
+        elif inputData == 'init':
             INITIALIZE_DATA_STATUS(ECRARM_STATUS)
+        else : 
+            print(">> no command")
 
 
 # 서버 IP 및 열어줄 포트
@@ -84,30 +85,32 @@ HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
 PORT = 9999
 
-try:
-    # 서버 소켓 생성
-    print('>> Server Start')
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind((HOST, PORT))
-    server.listen()
+if (__name__ == "__main__"):
+    try:
+        # 서버 소켓 생성
+        print('>> Server Start')
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind((HOST, PORT))
+        server.listen()
 
-    # 클라이언트가 접속하면 accept 함수에서 새로운 소켓을 리턴합니다.
-    # 새로운 쓰레드에서 해당 소켓을 사용하여 통신을 하게 됩니다.
-    print('>> Waiting...\n\n')
-    serverCommand = Thread(name="serverCommand",
-                           target=server_command, args=(), daemon=True)
-    serverCommand.start()
-    while True:
-        client, addr = server.accept()
-        clientList.append(client)
-        socketServer = Thread(
-            name="socketServer", target=socket_threaded, args=(client, addr), daemon=True)
-        socketServer.start()
+        # 서버 커맨드 쓰레드 생성
+        print('>> Waiting...\n\n')
+        serverCommand = Thread(name="serverCommand",
+                            target=_command_, args=(), daemon=True)
+        serverCommand.start()
+        while True:
+            # 클라이언트가 접속하면 accept 함수에서 새로운 소켓을 리턴합니다.
+            client, addr = server.accept()
+            clientList.append(client)
+            # 새로운 쓰레드에서 해당 소켓을 사용하여 통신을 하게 됩니다.
+            socketServer = Thread(
+                name="socketServer", target=socket_thread, args=(client, addr), daemon=True)
+            socketServer.start()
 
-except Exception as e:
-    print('에러는? : ', e)
-except KeyboardInterrupt:
-    print('강제종료')
-finally:
-    server.close()
+    except Exception as e:
+        print('에러는? : ', e)
+    except KeyboardInterrupt:
+        print('강제종료')
+    finally:
+        server.close()

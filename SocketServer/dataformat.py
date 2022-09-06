@@ -4,7 +4,6 @@ sys_status = ["error", "initializing", "waiting",
               "detecting", "controlling", "starting", "stopping", "manual"]
 web_client_ip_list = []
 
-
 ECRARM_STATUS = {
     "status": sys_status[1],
     "Detector": {
@@ -83,6 +82,7 @@ def UPDATE_SYS_STATUS(ECRARM_STATUS: dict):
     ECRARM_STATUS["status"] = sys_status[1]
     connection_status = ECRARM_STATUS["Controller"]["connect"] and ECRARM_STATUS[
         "Detector"]["connect"] and ECRARM_STATUS["Web"]["bridgeConnect"]
+    print(connection_status)
     if (connection_status):
         ECRARM_STATUS["status"] = sys_status[2]
     else:
@@ -120,8 +120,8 @@ def UPDATE_ECRARM_STATUS(ECRARM_STATUS: dict, IP: str, FROM: str, UpdateType: st
             f'\n>> {IP} | data status updated \n{FROM} : {ECRARM_STATUS[FROM]}')
     else:
         print(f'no match UpdateType')
-    # SHOW_ECRARM_STATUS()
     UPDATE_SYS_STATUS(ECRARM_STATUS)
+    # SHOW_ECRARM_STATUS()
     return
 
 
@@ -137,9 +137,9 @@ def DISCONNECT_AND_STATUS_UPDATE(ECRARM_STATUS: dict, IP: str):
     elif ECRARM_STATUS["Web"]["bridgeIp"] == IP:
         ECRARM_STATUS["Web"]["bridgeIp"] = ""
         ECRARM_STATUS["Web"]["bridgeConnect"] = False
-        print(">> websocket client")
-    SHOW_ECRARM_STATUS(ECRARM_STATUS)
+        print(">> websocket client disconnected")
     UPDATE_SYS_STATUS(ECRARM_STATUS)
+    SHOW_ECRARM_STATUS(ECRARM_STATUS)
     return
 
 
@@ -150,7 +150,6 @@ def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
         "accord_x": 0,
         "accord_y": 0
     }
-
     ECRARM_STATUS["Controller"]["data"] = {
         "X_Axis": 0,
         "Y_Axis": 0,
@@ -159,6 +158,8 @@ def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
         "R_Axis": 0
     }
     ECRARM_STATUS["Web"]["data"] = ""
+    UPDATE_SYS_STATUS(ECRARM_STATUS)
+    SHOW_ECRARM_STATUS(ECRARM_STATUS)
     return
 
 
