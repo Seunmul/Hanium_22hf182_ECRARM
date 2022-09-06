@@ -10,11 +10,14 @@ WEBSOCKET_PORT = 8888
 
 WEB_CLIENTS = []  # 서버에 접속한 클라이언트 목록
 
-# 서버로부터 메세지를 받는 메소드
-# 스레드로 구동 시켜, 메세지를 보내는 코드와 별개로 작동하도록 처리
+# 시스템 스테이터스 전역변수 선언
+global system_status
+system_status = "initializing"
 
 
 async def socket_to_web(websocket, reader, writer):
+    # 시스템 스테이터스 전역변수 사용
+    global system_status
     # 루프를 돌면서 입력받은 내용을 서버로 보내고,
     # 응답을 받으면 출력합니다.
     while True:
@@ -22,22 +25,52 @@ async def socket_to_web(websocket, reader, writer):
         receivedData = await reader.read(1024)  # type
         if not receivedData:  # 받은 메세지가 없으면 루프 해제.
             raise websockets.exceptions.ConnectionClosedError(" ", " ")
-        print(f"\n[StW] received: {len(receivedData)} bytes")
-        print(f"[StW] receivedData: {receivedData.decode()}")
+        # print(f"\n[StW] received: {len(receivedData)} bytes")
+        print(f"\n>> [StW] receivedData: {receivedData.decode()}")
+        system_status = json.loads(receivedData.decode())["status"]
+        # print(f">> [StW] system status : {system_status}")
         await websocket.send(receivedData.decode())
 
 
 async def web_to_socket(websocket, reader, writer):
+    # 시스템 스테이터스 전역변수 사용
+    global system_status
+    # 웹에서 온 응답을 소켓으로 전송하는 async 함수
     async for receivedData in websocket:
-        print(f"\n[WtS] received: {len(receivedData)} bytes")
-        # tempData = json.loads(receivedData)
-        # print(tempData)
-        sendingData = json.dumps({
-            "ip": websocket.remote_address,
-            "from": "Web",
-            "data": json.loads(receivedData)["data"]
-        }, sort_keys=True, indent=4)
-        print(f"[WtS] receivedData: {sendingData}")
+        # print(f"\n[WtS] received: {len(receivedData)} bytes")
+        data = json.loads(receivedData)["data"]
+        print(data)
+        if (data == "connect"):
+            sendingData = json.dumps({
+                "ip": websocket.remote_address,
+                "from": "Web",
+                "status": "connecting",
+                "data": data
+            }, sort_keys=True, indent=4)
+        elif (system_status == "waiting" and data == "start"):
+            sendingData = json.dumps({
+                "ip": websocket.remote_address,
+                "from": "Web",
+                "status": "starting",
+                "data": data
+            }, sort_keys=True, indent=4)
+        elif (data == "stop"):
+            sendingData = json.dumps({
+                "ip": websocket.remote_address,
+                "from": "Web",
+                "status": "stopping",
+                "data": data
+            }, sort_keys=True, indent=4)
+        else:
+            sendingData = json.dumps({
+                "ip": websocket.remote_address,
+                "from": "Web",
+                "status": "undefined case",
+                "data": "undefined"
+                }, sort_keys=True, indent=4)
+            print("\n>>[WtS] undefined web message")
+
+        print(f"\n>> [WtS] sendingData: {sendingData}")
         writer.write(sendingData.encode())
         # await websocket.send(sendingData)  # echo
 

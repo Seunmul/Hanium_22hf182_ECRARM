@@ -34,6 +34,7 @@ def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: f
 
 def send_connect_msg(client):
     sendingData = json.dumps({
+        "status" : "connecting",
         "from": "Controller",
         "data": "connect"
 
@@ -43,22 +44,35 @@ def send_connect_msg(client):
 
 
 def Controller_Client(client):
-    while True:
-        # recivedData 전역변수 사용
-        global recivedData
-        # dictionary type으로 받기
-        recivedData = json.loads(client.recv(1024).decode())
-        print(f"\n>> [C] received : \n{recivedData}")
-        if (recivedData["status"] == "detecting_finished"):
-            print("do something...")
-            # detecting 중인 것을 서버에다가 알려야함.
-            send_controller_data(client, status="controlling",
-                                 X=0, Y=0, Z=0, W=0, R=0)
-            time.sleep(3)
-            # 작업 코드 추가하면됩니다....
-            send_controller_data(client, status="controlling_finished",
-                                 X=10, Y=20, Z=30, W=40, R=50)
-            print("finished")
+    try:
+        while True:
+            # recivedData 전역변수 사용
+            global recivedData
+            # dictionary type으로 받기
+            recivedData = json.loads(client.recv(1024).decode())
+            print(f"\n>> [C] received : \n{recivedData}")
+            if (recivedData["status"] == "detecting_finished"):
+                print("do something...")
+                # detecting 중인 것을 서버에다가 알려야함.
+                send_controller_data(client, status="controlling",
+                                    X=0, Y=0, Z=0, W=0, R=0)
+                # echo 수신 후 동작
+                recivedData = json.loads(client.recv(1024).decode())
+                print(f"\n>> [D] received : \n{recivedData}")
+                time.sleep(3)
+                # 작업 코드 추가하면됩니다....
+                send_controller_data(client, status="controlling_finished",
+                                    X=10, Y=20, Z=30, W=40, R=50)
+            elif (recivedData["status"] == "stopping"):
+                print("stopping...")
+                time.sleep(3)
+                print("stopped")
+
+    except json.JSONDecodeError as e:
+        print(e)
+        print("잘못된 정보를 수신하였습니다.")
+        client.close()
+        return
 
 
 if (__name__ == "__main__"):

@@ -12,14 +12,16 @@ def socket_thread(client, addr):
     print(f'\n>> Connected by : [{addr}]')
     print(f'>> Current Sockets : {len(clientList)}')
     recivedData = json.loads(client.recv(1024).decode())
-    print(f'{recivedData}')
+    # print(f'{recivedData}')
+    # 커넥션 시 데이터 업데이트 및 메시징 초기화
+
     UPDATE_ECRARM_STATUS(ECRARM_STATUS,
-                         str(addr), recivedData["from"], recivedData["data"], True)
-    recivedData = ""
-    # 커넥션 시 명령.
-    print(f'>> Waiting...\n\n')
+                         IP=str(addr), FROM=recivedData["from"], 
+                         TYPE="connect", DATA=True,updatingStatus=recivedData["status"])
     for currentClient in clientList:
         currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
+    recivedData = ""
+    print(f'>> waiting socket connections ....\n\n')
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
     try:
         while True:
@@ -27,28 +29,11 @@ def socket_thread(client, addr):
             recivedData = client.recv(1024)
             if not recivedData:
                 raise ConnectionResetError()
-            tempData = json.loads(recivedData.decode())
-
-            if (tempData["from"] == "Controller"):
-                sendingData = json.dumps({
-                    "ip": [str(addr[0]), addr[1]],
-                    "from": tempData["from"],
-                    "data": tempData["data"]
-                }, sort_keys=True, indent=4)
-            elif (tempData["from"] == "Detector"):
-                sendingData = json.dumps({
-                    "ip": [str(addr[0]), addr[1]],
-                    "from": tempData["from"],
-                    "data": tempData["data"]
-                }, sort_keys=True, indent=4)
-            elif (tempData["from"] == "Web"):
-                sendingData = json.dumps({
-                    "ip": tempData["ip"],
-                    "from": tempData["from"],
-                    "data": tempData["data"]
-                }, sort_keys=True, indent=4)
+            recivedData = json.loads(recivedData.decode())
+            # print(f'{recivedData}')
             UPDATE_ECRARM_STATUS(ECRARM_STATUS,
-                                 str(addr), tempData["from"], "data", tempData["data"])
+                                 IP=str(addr), FROM=recivedData["from"], TYPE="data",
+                                 DATA=recivedData["data"], updatingStatus=recivedData["status"])
 
             # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
@@ -76,7 +61,9 @@ def _command_():
             SHOW_ECRARM_STATUS(ECRARM_STATUS)
         elif inputData == 'init':
             INITIALIZE_DATA_STATUS(ECRARM_STATUS)
-        else : 
+            for currentClient in clientList:
+                currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
+        else:
             print(">> no command")
 
 
@@ -97,7 +84,7 @@ if (__name__ == "__main__"):
         # 서버 커맨드 쓰레드 생성
         print('>> Waiting...\n\n')
         serverCommand = Thread(name="serverCommand",
-                            target=_command_, args=(), daemon=True)
+                               target=_command_, args=(), daemon=True)
         serverCommand.start()
         while True:
             # 클라이언트가 접속하면 accept 함수에서 새로운 소켓을 리턴합니다.
