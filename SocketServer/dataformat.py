@@ -11,8 +11,8 @@ ECRARM_STATUS = {
         "connect": False,  # True or False
         "data": {
             "class": "none",
-            "accord_x": 0,
-            "accord_y": 0
+            "x": 0,
+            "y": 0
         }
     },
     "Controller": {
@@ -41,8 +41,8 @@ def SEND_STATUS(ECRARM_STATUS: dict):
             "connect": ECRARM_STATUS["Detector"]["connect"],  # True or False
             "data": {
                 "class": ECRARM_STATUS["Detector"]["data"]["class"],
-                "accord_x": ECRARM_STATUS["Detector"]["data"]["accord_x"],
-                "accord_y": ECRARM_STATUS["Detector"]["data"]["accord_y"]
+                "x": ECRARM_STATUS["Detector"]["data"]["x"],
+                "y": ECRARM_STATUS["Detector"]["data"]["y"]
             }
         },
         "Controller": {
@@ -178,8 +178,8 @@ def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
     ECRARM_STATUS["status"] = sys_status[1]
     ECRARM_STATUS["Detector"]["data"] = {
         "class": "none",
-        "accord_x": 0,
-        "accord_y": 0
+        "x": 0,
+        "y": 0
     }
     ECRARM_STATUS["Controller"]["data"] = {
         "X_Axis": 0,

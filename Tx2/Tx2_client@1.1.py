@@ -18,8 +18,8 @@ def send_detector_data(client, status: str, classType: str,  accord_x: float, ac
         "from": "Detector",
         "data": {
                 "class": classType,
-                "accord_x": str(accord_x),
-                "accord_y": str(accord_y)
+                "x": str(accord_x),
+                "y": str(accord_y)
         }
 
     }, sort_keys=True, indent=4)
@@ -49,7 +49,7 @@ def Detector_Client(client):
             # dictionary type으로 받기
             recivedData = json.loads(client.recv(1024).decode())
             print(f"\n>> [D] received : \n{recivedData}")
-            if (recivedData["status"] == "starting" or recivedData["status"] == "controlling_finished"):
+            if (recivedData["status"] == "starting"):
                 print("do something...")
                 # detecting 중인 것을 서버에다가 알려야함.
                 send_detector_data(client,  status="detecting", classType="resistor",
@@ -57,6 +57,8 @@ def Detector_Client(client):
                 # echo 수신 후 동작
                 recivedData = json.loads(client.recv(1024).decode())
                 print(f"\n>> [D] received : \n{recivedData}")
+                # 작업 코드 
+                print("do something...")
                 time.sleep(3)
                 # 작업 코드 추가하면됩니다....
                 send_detector_data(client, status="detecting_finished", classType="resistor",

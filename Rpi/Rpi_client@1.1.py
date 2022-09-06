@@ -52,13 +52,14 @@ def Controller_Client(client):
             recivedData = json.loads(client.recv(1024).decode())
             print(f"\n>> [C] received : \n{recivedData}")
             if (recivedData["status"] == "detecting_finished"):
-                print("do something...")
                 # detecting 중인 것을 서버에다가 알려야함.
                 send_controller_data(client, status="controlling",
                                     X=0, Y=0, Z=0, W=0, R=0)
                 # echo 수신 후 동작
                 recivedData = json.loads(client.recv(1024).decode())
                 print(f"\n>> [D] received : \n{recivedData}")
+                # 작업 코드
+                print("do something...")
                 time.sleep(3)
                 # 작업 코드 추가하면됩니다....
                 send_controller_data(client, status="controlling_finished",
