@@ -34,7 +34,7 @@ def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: f
 
 def send_connect_msg(client):
     sendingData = json.dumps({
-        "status" : "connecting",
+        "status": "connecting",
         "from": "Controller",
         "data": "connect"
 
@@ -54,26 +54,28 @@ def Controller_Client(client):
             if (recivedData["status"] == "detecting_finished"):
                 # detecting 중인 것을 서버에다가 알려야함.
                 send_controller_data(client, status="controlling",
-                                    X=0, Y=0, Z=0, W=0, R=0)
+                                     X=0, Y=0, Z=0, W=0, R=0)
                 # echo 수신 후 동작
                 recivedData = json.loads(client.recv(1024).decode())
                 print(f"\n>> [D] received : \n{recivedData}")
                 # 작업 코드
-                print("do something...")
+                print("\n\n\n\n ---- Controlling Arms ...---- \n\n\n\n")
                 time.sleep(3)
                 # 작업 코드 추가하면됩니다....
                 send_controller_data(client, status="controlling_finished",
-                                    X=10, Y=20, Z=30, W=40, R=50)
+                                     X=10, Y=20, Z=30, W=40, R=50)
             elif (recivedData["status"] == "stopping"):
                 print("stopping...")
+                # recivedData = json.loads(client.recv(1024).decode())
+                # print(f"\n>> [C] received : \n{recivedData}")
                 time.sleep(3)
                 print("stopped")
+                
 
     except json.JSONDecodeError as e:
         print(e)
         print("잘못된 정보를 수신하였습니다.")
-        client.close()
-        return
+ 
 
 
 if (__name__ == "__main__"):
@@ -91,8 +93,10 @@ if (__name__ == "__main__"):
             print("exit client")
             break
         elif inputData == 'clear':
-            send_controller_data(client, status=recivedData["status"],X=0, Y=0, Z=0, W=0, R=0)
+            send_controller_data(
+                client, status=recivedData["status"], X=0, Y=0, Z=0, W=0, R=0)
         elif inputData == 'td':
-            send_controller_data(client, status=recivedData["status"],X=5, Y=5, Z=5, W=5, R=5)
+            send_controller_data(
+                client, status=recivedData["status"], X=5, Y=5, Z=5, W=5, R=5)
 
     client.close()

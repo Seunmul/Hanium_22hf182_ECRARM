@@ -12,7 +12,7 @@ def socket_thread(client, addr):
     print(f'\n>> Connected by : [{addr}]')
     print(f'>> Current Sockets : {len(clientList)}')
     recivedData = json.loads(client.recv(1024).decode())
-    # print(f'{recivedData}')
+    print(f'{recivedData}')
     # 커넥션 시 데이터 업데이트 및 메시징 초기화
 
     UPDATE_ECRARM_STATUS(ECRARM_STATUS,

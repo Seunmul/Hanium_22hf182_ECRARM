@@ -32,7 +32,7 @@ def send_detector_data(client, status: str, classType: str,  accord_x: float, ac
 
 def send_connect_msg(client):
     sendingData = json.dumps({
-        "status" : "connecting",
+        "status": "connecting",
         "from": "Detector",
         "data": "connect"
 
@@ -49,20 +49,19 @@ def Detector_Client(client):
             # dictionary type으로 받기
             recivedData = json.loads(client.recv(1024).decode())
             print(f"\n>> [D] received : \n{recivedData}")
-            if (recivedData["status"] == "starting"):
-                print("do something...")
+            if (recivedData["status"] == "starting" or recivedData["status"] == "controlling_finished"):
                 # detecting 중인 것을 서버에다가 알려야함.
                 send_detector_data(client,  status="detecting", classType="resistor",
-                                accord_x=0, accord_y=0)
+                                   accord_x=0, accord_y=0)
                 # echo 수신 후 동작
                 recivedData = json.loads(client.recv(1024).decode())
                 print(f"\n>> [D] received : \n{recivedData}")
-                # 작업 코드 
-                print("do something...")
+                # 작업 코드
+                print("\n\n\n\n ---- Detecting Elements......---- \n\n\n\n")
                 time.sleep(3)
                 # 작업 코드 추가하면됩니다....
                 send_detector_data(client, status="detecting_finished", classType="resistor",
-                                accord_x=30, accord_y=20)
+                                   accord_x=30, accord_y=20)
             elif (recivedData["status"] == "stopping"):
                 print("stopping...")
                 time.sleep(3)
@@ -71,8 +70,8 @@ def Detector_Client(client):
     except json.JSONDecodeError as e:
         print(e)
         print("잘못된 정보를 수신하였습니다.")
-        client.close()
-        return
+
+
 
 if (__name__ == "__main__"):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
