@@ -73,8 +73,10 @@ if (__name__ == "__main__"):
         if inputData == 'quit':
             print("exit client")
             break
-        if inputData == 'clear':
+        elif inputData == 'clear':
             send_detector_data(client, status=recivedData["status"], classType="none",
                                accord_x=0, accord_y=0)
-
+        elif inputData == 'td':
+            send_detector_data(client, status=recivedData["status"], classType="resistor",
+                               accord_x=60, accord_y=60)
     client.close()

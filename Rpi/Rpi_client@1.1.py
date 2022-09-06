@@ -75,7 +75,9 @@ if (__name__ == "__main__"):
         if inputData == 'quit':
             print("exit client")
             break
-        if inputData == 'clear':
+        elif inputData == 'clear':
             send_controller_data(client, status=recivedData["status"],X=0, Y=0, Z=0, W=0, R=0)
+        elif inputData == 'td':
+            send_controller_data(client, status=recivedData["status"],X=5, Y=5, Z=5, W=5, R=5)
 
     client.close()

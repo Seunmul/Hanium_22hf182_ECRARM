@@ -4,6 +4,7 @@ sys_status = ["error", "initializing", "waiting",
               "detecting", "controlling", "starting", "stopping", "manual"]
 web_client_ip_list = []
 
+
 ECRARM_STATUS = {
     "status": sys_status[1],
     "Detector": {
@@ -34,7 +35,7 @@ ECRARM_STATUS = {
 }
 
 
-def SENDING_FORMAT(ECRARM_STATUS):
+def SEND_STATUS(ECRARM_STATUS: dict):
     data = json.dumps({
         "status": ECRARM_STATUS["status"],
         "Detector": {
@@ -64,7 +65,7 @@ def SENDING_FORMAT(ECRARM_STATUS):
     return data
 
 
-def SHOW_ECRARM_STATUS():
+def SHOW_ECRARM_STATUS(ECRARM_STATUS: dict):
     print(
         f"\n>> Current Status : {json.dumps(ECRARM_STATUS,sort_keys=True,indent=4)}")
     return
@@ -78,7 +79,7 @@ def SHOW_ECRARM_STATUS():
 # connect일 경우 연결 데이터만 업데이트, data일 경우 내부 데이터들을 업데이트
 
 
-def update_sys_status():
+def UPDATE_SYS_STATUS(ECRARM_STATUS: dict):
     ECRARM_STATUS["status"] = sys_status[1]
     connection_status = ECRARM_STATUS["Controller"]["connect"] and ECRARM_STATUS[
         "Detector"]["connect"] and ECRARM_STATUS["Web"]["bridgeConnect"]
@@ -89,7 +90,7 @@ def update_sys_status():
     return
 
 
-def UPDATE_ECRARM_STATUS(IP: str, FROM: str, UpdateType: str, DATA: str):
+def UPDATE_ECRARM_STATUS(ECRARM_STATUS: dict, IP: str, FROM: str, UpdateType: str, DATA: str):
     if UpdateType == "connect":
         if FROM == "Controller":
             ECRARM_STATUS["Controller"]["ip"] = IP
@@ -120,11 +121,11 @@ def UPDATE_ECRARM_STATUS(IP: str, FROM: str, UpdateType: str, DATA: str):
     else:
         print(f'no match UpdateType')
     # SHOW_ECRARM_STATUS()
-    update_sys_status()
+    UPDATE_SYS_STATUS(ECRARM_STATUS)
     return
 
 
-def DISCONNECT_AND_STATUS_UPDATE(IP):
+def DISCONNECT_AND_STATUS_UPDATE(ECRARM_STATUS: dict, IP: str):
     if ECRARM_STATUS["Controller"]["ip"] == IP:
         ECRARM_STATUS["Controller"]["ip"] = ""
         ECRARM_STATUS["Controller"]["connect"] = False
@@ -137,8 +138,27 @@ def DISCONNECT_AND_STATUS_UPDATE(IP):
         ECRARM_STATUS["Web"]["bridgeIp"] = ""
         ECRARM_STATUS["Web"]["bridgeConnect"] = False
         print(">> websocket client")
-    SHOW_ECRARM_STATUS()
-    update_sys_status()
+    SHOW_ECRARM_STATUS(ECRARM_STATUS)
+    UPDATE_SYS_STATUS(ECRARM_STATUS)
+    return
+
+
+def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
+    ECRARM_STATUS["status"] = sys_status[1]
+    ECRARM_STATUS["Detector"]["data"] = {
+        "class": "none",
+        "accord_x": 0,
+        "accord_y": 0
+    }
+
+    ECRARM_STATUS["Controller"]["data"] = {
+        "X_Axis": 0,
+        "Y_Axis": 0,
+        "Z_Axis": 0,
+        "W_Axis": 0,
+        "R_Axis": 0
+    }
+    ECRARM_STATUS["Web"]["data"] = ""
     return
 
 
