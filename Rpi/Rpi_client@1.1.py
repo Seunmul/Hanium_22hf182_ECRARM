@@ -1,16 +1,20 @@
 import json
 from threading import Thread
 import socket
+import time
 
 HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
 PORT = 9999
 
+# recivedData 전역변수 선언
+global recivedData
 # controller의 데이터를 서버로 전송
 
 
-def send_controller_data(client, X: float, Y: float, Z: float, W: float, R: float):
+def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: float, R: float):
     sendingData = json.dumps({
+        "status": status,
         "from": "Controller",
         "data": {
             "X_Axis": str(X),
@@ -26,6 +30,8 @@ def send_controller_data(client, X: float, Y: float, Z: float, W: float, R: floa
     return
 
 # connect 메시지 전송 및 이니셜라이즈
+
+
 def send_connect_msg(client):
     sendingData = json.dumps({
         "from": "Controller",
@@ -36,11 +42,23 @@ def send_connect_msg(client):
     return
 
 
-def recv_data(client):
+def Controller_Client(client):
     while True:
+        # recivedData 전역변수 사용
+        global recivedData
         # dictionary type으로 받기
         recivedData = json.loads(client.recv(1024).decode())
         print(f"\n>> Received : \n{recivedData}")
+        if (recivedData["status"] == "detecting_finished"):
+            print("do something...")
+            # detecting 중인 것을 서버에다가 알려야함.
+            send_controller_data(client, status="controlling",
+                                 X=0, Y=0, Z=0, W=0, R=0)
+            time.sleep(3)
+            # 작업 코드 추가하면됩니다....
+            send_controller_data(client, status="controlling_finished",
+                                 X=10, Y=20, Z=30, W=40, R=50)
+            print("finished")
 
 
 if (__name__ == "__main__"):
@@ -48,15 +66,16 @@ if (__name__ == "__main__"):
     client.connect((HOST, PORT))
     print('>> Connect Server')
     send_connect_msg(client)
-    socketClient = Thread(name="socketClient", target=recv_data,
-                          args=(client,), daemon=True)
-    socketClient.start()
+    Controller_Client = Thread(name="Controller_Client", target=Controller_Client,
+                               args=(client,), daemon=True)
+    Controller_Client.start()
 
     while True:
         inputData = input('')
         if inputData == 'quit':
             print("exit client")
             break
-        send_controller_data(client, X=10, Y=20, Z=30, W=40, R=50)
+        if inputData == 'clear':
+            send_controller_data(client, status=recivedData["status"],X=0, Y=0, Z=0, W=0, R=0)
 
     client.close()
