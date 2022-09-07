@@ -1,5 +1,4 @@
 import json
-from logging import raiseExceptions
 from threading import Thread
 import socket
 import time
@@ -8,9 +7,9 @@ HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
 PORT = 9999
 
-# recivedData 전역변수 선언
-global recivedData
-recivedData = {
+# receivedData 전역변수 선언
+global receivedData
+receivedData = {
     "Controller": {
         "connect": True,
         "data": {
@@ -35,7 +34,6 @@ recivedData = {
     },
     "status": "initializing"
 }
-
 
 # controller의 데이터를 서버로 전송
 def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: float, R: float):
@@ -68,37 +66,41 @@ def send_connect_msg(client):
 
 
 def _control_(client):
-    # recivedData 전역변수 사용
-    global recivedData
-    if (recivedData["status"] == "detecting_finished"):
-        # detecting 중인 것을 서버에다가 알려야함.
+    # receivedData 전역변수 사용
+    global receivedData
+    if(receivedData["status"] == "detecting_finished") :
+        #control status 서버에 알리기
         send_controller_data(client, status="controlling",
                              X=0, Y=0, Z=0, W=0, R=0)
-        # echo 수신 후 동작
-        recivedData = json.loads(client.recv(1024).decode())
-        print(f"\n>> [D] received : \n{recivedData}")
-        # 작업 코드
+        # 작업 코드 추가하면됩니다....
         print("\n\n\n\n ---- Controlling Arms ...---- \n\n\n\n")
         time.sleep(3)
-        # 작업 코드 추가하면됩니다....
+        # 작업 코드 
+        # stopping status 시 리턴
+        if(receivedData["status"] == "stopping") :
+            send_controller_data(client, status="controlling_stopped",
+                             X=10, Y=20, Z=30, W=40, R=50)
+            return; 
+        #control status 서버에 알리기
         send_controller_data(client, status="controlling_finished",
                              X=10, Y=20, Z=30, W=40, R=50)
     return
 
 
 def _listener_(client):
-    # recivedData 전역변수 사용
-    global recivedData
+    # receivedData 전역변수 사용
+    global receivedData
     while True:
         try:
             # dictionary type으로 받기
             tempData = client.recv(1024)
             if not tempData:
                 raise ConnectionResetError()
-            recivedData = json.loads(tempData.decode())
-            print(
-                f"\n>> [C] received : \n{json.dumps(recivedData,sort_keys=True, indent=4)}")
-
+            receivedData = json.loads(tempData.decode())
+            # print(
+            #     f"\n>> [C] received : \n{json.dumps(receivedData,sort_keys=True, indent=4)}")
+            print(f">> [Status] {receivedData['status']}")
+            
         except OSError as e:
             print(e)
             print(">> 소켓 서버 연결이 끊긴 것 같습니다. 프로그램을 종료합니다.")
@@ -111,49 +113,21 @@ def _listener_(client):
 
 
 def Controller_Client(client):
-    # recivedData 전역변수 사용
-    global recivedData
+    # receivedData 전역변수 사용
+    global receivedData
     global isControlling
 
     isControlling = bool(False)
     
     while True:
-        if ((not isControlling) and recivedData["status"] == "detecting_finished"):
+        if ((not isControlling)):
             isControlling = True
-            send_controller_data(client, status="controlling",
-                                 X=0, Y=0, Z=0, W=0, R=0)
-            # 작업 코드
-            print("\n\n\n\n ---- Controlling Arms ...---- \n\n\n\n")
-            time.sleep(3)
-            # 작업 코드 추가하면됩니다....
-            send_controller_data(client, status="controlling_finished",
-                                 X=10, Y=20, Z=30, W=40, R=50)
+            startingControl = Thread(name="_control_", target=_control_,
+                                     args=(client,), daemon=True)
+            startingControl.start()
+            startingControl.join()
             isControlling = False
-        elif (recivedData["status"] == "stopping"):
-            isControlling = False
-        else :
-            pass
-
-    # if (isControlling) :
-    #     startingControl = Thread(name="_control_", target=_control_,
-    #                                  args=(client,), daemon=True)
-    #     startingControl.start()
-    #     startingControl.join()
-
-    # while True:
-    #     else:
-    #         print(f"\n>> [C] received : \n{recivedData}")
-    #         if (recivedData["status"] == "stopping"):
-    #             print("stopping...")
-    #             print("stopped")
-    #             send_controller_data(client, status="stopping",
-    #                      X=0, Y=0, Z=0, W=0, R=0)
-    #         startingControl = Thread(name="_control_", target=_control_,
-    #                                      args=(client,), daemon=True)
-    #         startingControl.start()
-    #         startingControl.join()
-    #     finally:
-    #         pass
+        
 
 
 if (__name__ == "__main__"):
@@ -176,10 +150,10 @@ if (__name__ == "__main__"):
                 break
             elif inputData == 'clear':
                 send_controller_data(
-                    client, status=recivedData["status"], X=0, Y=0, Z=0, W=0, R=0)
+                    client, status=receivedData["status"], X=0, Y=0, Z=0, W=0, R=0)
             elif inputData == 'td':
                 send_controller_data(
-                    client, status=recivedData["status"], X=5, Y=5, Z=5, W=5, R=5)
+                    client, status=receivedData["status"], X=5, Y=5, Z=5, W=5, R=5)
 
     except KeyboardInterrupt:
         print('강제종료')

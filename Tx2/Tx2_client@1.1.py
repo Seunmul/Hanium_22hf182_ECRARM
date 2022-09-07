@@ -7,9 +7,9 @@ HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
 PORT = 9999
 
-# recivedData 전역변수 선언
-global recivedData
-recivedData = {
+# receivedData 전역변수 선언
+global receivedData
+receivedData = {
     "Controller": {
         "connect": True,
         "data": {
@@ -36,8 +36,6 @@ recivedData = {
 }
 
 # detector의 데이터를 서버로 전송
-
-
 def send_detector_data(client, status: str, classType: str,  accord_x: float, accord_y: float):
     sendingData = json.dumps({
         "status": status,
@@ -54,8 +52,6 @@ def send_detector_data(client, status: str, classType: str,  accord_x: float, ac
     return
 
 # connect 메시지 전송 및 이니셜라이즈
-
-
 def send_connect_msg(client):
     sendingData = json.dumps({
         "status": "connecting",
@@ -67,26 +63,31 @@ def send_connect_msg(client):
     return
 
 
-# def _control_(client, recivedData):
-#     if (recivedData["status"] == "starting" or recivedData["status"] == "controlling_finished"):
-#         # detecting 중인 것을 서버에다가 알려야함.
-#         send_detector_data(client,  status="detecting", classType="resistor",
-#                            accord_x=0, accord_y=0)
-#         # echo 수신 후 동작
-#         recivedData = json.loads(client.recv(1024).decode())
-#         print(f"\n>> [D] received : \n{recivedData}")
-#         # 작업 코드
-#         print("\n\n\n\n ---- Detecting Elements......---- \n\n\n\n")
-#         time.sleep(3)
-#         # 작업 코드 추가하면됩니다....
-#         send_detector_data(client, status="detecting_finished", classType="resistor",
-#                            accord_x=30, accord_y=20)
-#     return
+def _detect_(client):
+    # receivedData 전역변수 사용
+    global receivedData
+    if (receivedData["status"] == "starting" or receivedData["status"] == "controlling_finished"):
+        # detecting 중인 것을 서버에다가 알려야함.
+        send_detector_data(client,  status="detecting", classType="resistor",
+                           accord_x=0, accord_y=0)
+        # 작업 코드 추가하면됩니다....
+        print("\n\n\n\n ---- Detecting Elements......---- \n\n\n\n")
+        time.sleep(3)
+        # 작업 코드 
+        # stopping status 시 리턴
+        if(receivedData["status"] == "stopping") :
+            send_detector_data(client, status="detecting_stopped", classType="resistor",
+                           accord_x=30, accord_y=20)
+            return; 
+        # detecting 끝남 상태 알림
+        send_detector_data(client, status="detecting_finished", classType="resistor",
+                           accord_x=30, accord_y=20)
+    return
 
 
 def _listener_(client):
-    # recivedData 전역변수 사용
-    global recivedData
+    # receivedData 전역변수 사용
+    global receivedData
     while True:
         try:
             # dictionary type으로 받기
@@ -94,9 +95,10 @@ def _listener_(client):
             if not tempData:
                 print(tempData)
                 raise ConnectionResetError()
-            recivedData = json.loads(tempData.decode())
-            print(
-                f"\n>> [C] received : \n{json.dumps(recivedData,sort_keys=True, indent=4)}")
+            receivedData = json.loads(tempData.decode())
+            # print(
+            #     f"\n>> [C] received : \n{json.dumps(receivedData,sort_keys=True, indent=4)}")
+            print(f">> [Status] {receivedData['status']}")
 
         except OSError as e:
             print(e)
@@ -110,45 +112,21 @@ def _listener_(client):
 
 
 def Detector_Client(client):
-    # recivedData 전역변수 사용
-    global recivedData
+    # receivedData 전역변수 사용
+    global receivedData
     global isDetecting
 
     isDetecting = bool(False)
 
     while True:
-       
-        if (((not isDetecting) and recivedData["status"] == "starting") 
-            or ((not isDetecting) and recivedData["status"] == "controlling_finished")):
+        if ((not isDetecting)):
             isDetecting = True
-            # detecting 중인 것을 서버에다가 알려야함.
-            send_detector_data(client,  status="detecting", classType="resistor",
-                               accord_x=0, accord_y=0)
-            # 작업 코드
-            print("\n\n\n\n ---- Detecting Elements......---- \n\n\n\n")
-            time.sleep(3)
-            # 작업 코드 추가하면됩니다....
-            send_detector_data(client, status="detecting_finished", classType="resistor",
-                           accord_x=30, accord_y=20)
+            startingDetect = Thread(name="_detect_", target=_detect_,
+                                         args=(client,), daemon=True)
+            startingDetect.start()
+            startingDetect.join()
             isDetecting = False
-        elif (recivedData["status"] == "stopping"):
-            isDetecting = False
-        else :
-            pass
-            # else:
-            #     print(f"\n>> [D] received : \n{recivedData}")
-            #     if (recivedData["status"] == "stopping"):
-            #         print("stopping...")
-            #         print("stopped")
-            #         send_detector_data(client, status="stopping", classType="resistor",
-            #                            accord_x=30, accord_y=20)
-            #         continue
-            #     startingControl = Thread(name="_control_", target=_control_,
-            #                              args=(client, recivedData), daemon=True)
-            #     startingControl.start()
-            #     startingControl.join()
-            # finally:
-            #     pass
+
 
 
 if (__name__ == "__main__"):
@@ -171,10 +149,10 @@ if (__name__ == "__main__"):
                 print("exit client")
                 break
             elif inputData == 'clear':
-                send_detector_data(client, status=recivedData["status"], classType="none",
+                send_detector_data(client, status=receivedData["status"], classType="none",
                                    accord_x=0, accord_y=0)
             elif inputData == 'td':
-                send_detector_data(client, status=recivedData["status"], classType="resistor",
+                send_detector_data(client, status=receivedData["status"], classType="resistor",
                                    accord_x=60, accord_y=60)
 
     except KeyboardInterrupt as e:

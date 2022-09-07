@@ -21,15 +21,24 @@ async def socket_to_web(websocket, reader, writer):
     # 루프를 돌면서 입력받은 내용을 서버로 보내고,
     # 응답을 받으면 출력합니다.
     while True:
-        # 서버로부터 받은 응답을 표시
-        receivedData = await reader.read(1024)  # type
-        if not receivedData:  # 받은 메세지가 없으면 루프 해제.
-            raise websockets.exceptions.ConnectionClosedError(" ", " ")
+        try:
+            # 서버로부터 받은 응답을 표시
+            tempData = await reader.read(1024)  # type
+            # 받은 메세지가 없으면 루프 해제.
+            if not tempData:
+                raise websockets.exceptions.ConnectionClosedError(" ", " ")
+            receivedData = json.loads(tempData)
+        except json.JSONDecodeError as e:
+            print(e)
+            print("잘못된 정보를 수신하였습니다.")
+            receivedData=""
+            continue
         # print(f"\n[StW] received: {len(receivedData)} bytes")
-        print(f"\n>> [StW] receivedData: {receivedData.decode()}")
-        system_status = json.loads(receivedData.decode())["status"]
-        # print(f">> [StW] system status : {system_status}")
-        await websocket.send(receivedData.decode())
+        # print(f"\n>> [StW] receivedData: {receivedData}")
+        system_status = receivedData["status"]
+        print(f">> [StW] system status : {system_status}")
+        await websocket.send(json.dumps(receivedData))
+        
 
 
 async def web_to_socket(websocket, reader, writer):
@@ -39,7 +48,7 @@ async def web_to_socket(websocket, reader, writer):
     async for receivedData in websocket:
         # print(f"\n[WtS] received: {len(receivedData)} bytes")
         data = json.loads(receivedData)["data"]
-        print(data)
+        # print(data)
         if (data == "connect"):
             sendingData = json.dumps({
                 "ip": websocket.remote_address,
