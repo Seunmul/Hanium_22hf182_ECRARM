@@ -16,39 +16,46 @@ def socket_thread(client, addr):
     # 커넥션 시 데이터 업데이트 및 메시징 초기화
 
     UPDATE_ECRARM_STATUS(ECRARM_STATUS,
-                         IP=str(addr), FROM=recivedData["from"], 
-                         TYPE="connect", DATA=True,updatingStatus=recivedData["status"])
+                         IP=str(addr), FROM=recivedData["from"],
+                         TYPE="connect", DATA=True, updatingStatus=recivedData["status"])
     for currentClient in clientList:
         currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
     recivedData = ""
     print(f'>> waiting socket connections ....\n\n')
     # 클라이언트가 접속을 끊을 때 까지 반복합니다.
-    try:
-        while True:
-            # 데이터가 수신되면 클라이언트에 다시 전송합니다.(에코)
-            recivedData = client.recv(1024)
-            if not recivedData:
+
+    while True:
+        # 데이터가 수신되면 클라이언트에 다시 전송합니다.(에코)
+        try:
+            tempData = client.recv(1024)
+            if not tempData:
                 raise ConnectionResetError()
-            recivedData = json.loads(recivedData.decode())
+            recivedData = json.loads(tempData.decode())
+        except json.JSONDecodeError as e:
+            print(e)
+            print("잘못된 정보를 수신하였습니다.")
+            recivedData=""
+            continue
+        except ConnectionResetError as e:
+            if client in clientList:
+                clientList.remove(client)
+                print(f'>> \nDisconnected by [{addr}]')
+                print(f'>> Current Sockets : {len(clientList)}')
+                DISCONNECT_AND_STATUS_UPDATE(ECRARM_STATUS, str(addr))
+                for currentClient in clientList:
+                    currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
+                print(f'>> Waiting...\n\n')
+
+        else:
             # print(f'{recivedData}')
             UPDATE_ECRARM_STATUS(ECRARM_STATUS,
                                  IP=str(addr), FROM=recivedData["from"], TYPE="data",
                                  DATA=recivedData["data"], updatingStatus=recivedData["status"])
-
             # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
                 # if currentClient != client:
                 currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
 
-    except ConnectionResetError as e:
-        if client in clientList:
-            clientList.remove(client)
-            print(f'>> \nDisconnected by [{addr}]')
-            print(f'>> Current Sockets : {len(clientList)}')
-            DISCONNECT_AND_STATUS_UPDATE(ECRARM_STATUS, str(addr))
-            for currentClient in clientList:
-                currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
-            print(f'>> Waiting...\n\n')
 
 # 서버 커맨드
 def _command_():
