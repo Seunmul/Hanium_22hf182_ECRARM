@@ -74,7 +74,7 @@ def _control_(client):
                              X=0, Y=0, Z=0, W=0, R=0)
         # 작업 코드 추가하면됩니다....
         print("\n\n\n\n ---- Controlling Arms ...---- \n\n\n\n")
-        time.sleep(3)
+        time.sleep(1)
         # 작업 코드 
         # stopping status 시 리턴
         if(receivedData["status"] == "stopping") :
