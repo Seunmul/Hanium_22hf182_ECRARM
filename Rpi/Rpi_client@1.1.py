@@ -10,16 +10,7 @@ PORT = 9999
 # receivedData 전역변수 선언
 global receivedData
 receivedData = {
-    "Controller": {
-        "connect": True,
-        "data": {
-            "R_Axis": 0,
-            "W_Axis": 0,
-            "X_Axis": 0,
-            "Y_Axis": 0,
-            "Z_Axis": 0
-        }
-    },
+    "status": "initializing",
     "Detector": {
         "connect": False,
         "data": {
@@ -28,14 +19,25 @@ receivedData = {
             "y": 0
         }
     },
+    "Controller": {
+        "connect": True,
+        "data": {
+            "X_Axis": 0,
+            "Y_Axis": 0,
+            "Z_Axis": 0,
+            "R_Axis": 0,
+            "W_Axis": 0
+        }
+    },
     "Web": {
         "bridgeConnect": False,
         "data": ""
-    },
-    "status": "initializing"
+    }
 }
 
 # controller의 데이터를 서버로 전송
+
+
 def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: float, R: float):
     sendingData = json.dumps({
         "status": status,
@@ -54,6 +56,8 @@ def send_controller_data(client, status: str, X: float, Y: float, Z: float, W: f
     return
 
 # connect 메시지 전송 및 이니셜라이즈
+
+
 def send_connect_msg(client):
     sendingData = json.dumps({
         "status": "connecting",
@@ -68,20 +72,20 @@ def send_connect_msg(client):
 def _control_(client):
     # receivedData 전역변수 사용
     global receivedData
-    if(receivedData["status"] == "detecting_finished") :
-        #control status 서버에 알리기
+    if (receivedData["status"] == "detecting_finished"):
+        # control status 서버에 알리기
         send_controller_data(client, status="controlling",
                              X=0, Y=0, Z=0, W=0, R=0)
         # 작업 코드 추가하면됩니다....
-        print("\n\n\n\n ---- Controlling Arms ...---- \n\n\n\n")
+        print("\n\n ---- Controlling Arms ...---- \n\n")
         time.sleep(1)
-        # 작업 코드 
+        # 작업 코드
         # stopping status 시 리턴
-        if(receivedData["status"] == "stopping") :
+        if (receivedData["status"] == "stopping"):
             send_controller_data(client, status="controlling_stopped",
-                             X=10, Y=20, Z=30, W=40, R=50)
-            return; 
-        #control status 서버에 알리기
+                                 X=10, Y=20, Z=30, W=40, R=50)
+            return
+        # control status 서버에 알리기
         send_controller_data(client, status="controlling_finished",
                              X=10, Y=20, Z=30, W=40, R=50)
     return
@@ -100,7 +104,7 @@ def _listener_(client):
             # print(
             #     f"\n>> [C] received : \n{json.dumps(receivedData,sort_keys=True, indent=4)}")
             print(f">> [Status] {receivedData['status']}")
-            
+
         except OSError as e:
             print(e)
             print(">> 소켓 서버 연결이 끊긴 것 같습니다. 프로그램을 종료합니다.")
@@ -118,7 +122,7 @@ def Controller_Client(client):
     global isControlling
 
     isControlling = bool(False)
-    
+
     while True:
         if ((not isControlling)):
             isControlling = True
@@ -127,7 +131,6 @@ def Controller_Client(client):
             startingControl.start()
             startingControl.join()
             isControlling = False
-        
 
 
 if (__name__ == "__main__"):
@@ -137,10 +140,10 @@ if (__name__ == "__main__"):
         print('>> Connect Server')
         send_connect_msg(client)
         Listener = Thread(name="_listener_", target=_listener_,
-                      args=(client,), daemon=True)
+                          args=(client,), daemon=True)
         Listener.start()
         Controller_Client_thread = Thread(name="Controller_Client", target=Controller_Client,
-                                   args=(client,), daemon=True)
+                                          args=(client,), daemon=True)
         Controller_Client_thread.start()
 
         while True:

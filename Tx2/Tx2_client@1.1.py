@@ -10,16 +10,7 @@ PORT = 9999
 # receivedData 전역변수 선언
 global receivedData
 receivedData = {
-    "Controller": {
-        "connect": True,
-        "data": {
-            "R_Axis": 0,
-            "W_Axis": 0,
-            "X_Axis": 0,
-            "Y_Axis": 0,
-            "Z_Axis": 0
-        }
-    },
+    "status": "initializing",
     "Detector": {
         "connect": False,
         "data": {
@@ -28,14 +19,25 @@ receivedData = {
             "y": 0
         }
     },
+    "Controller": {
+        "connect": True,
+        "data": {
+            "X_Axis": 0,
+            "Y_Axis": 0,
+            "Z_Axis": 0,
+            "R_Axis": 0,
+            "W_Axis": 0
+        }
+    },
     "Web": {
         "bridgeConnect": False,
         "data": ""
-    },
-    "status": "initializing"
+    }
 }
 
 # detector의 데이터를 서버로 전송
+
+
 def send_detector_data(client, status: str, classType: str,  accord_x: float, accord_y: float):
     sendingData = json.dumps({
         "status": status,
@@ -52,6 +54,8 @@ def send_detector_data(client, status: str, classType: str,  accord_x: float, ac
     return
 
 # connect 메시지 전송 및 이니셜라이즈
+
+
 def send_connect_msg(client):
     sendingData = json.dumps({
         "status": "connecting",
@@ -71,14 +75,14 @@ def _detect_(client):
         send_detector_data(client,  status="detecting", classType="resistor",
                            accord_x=0, accord_y=0)
         # 작업 코드 추가하면됩니다....
-        print("\n\n\n\n ---- Detecting Elements......---- \n\n\n\n")
-        time.sleep(1)
-        # 작업 코드 
+        print("\n\n ---- Detecting Elements......---- \n\n")
+        time.sleep(5)
+        # 작업 코드
         # stopping status 시 리턴
-        if(receivedData["status"] == "stopping") :
+        if (receivedData["status"] == "stopping"):
             send_detector_data(client, status="detecting_stopped", classType="resistor",
-                           accord_x=30, accord_y=20)
-            return; 
+                               accord_x=30, accord_y=20)
+            return
         # detecting 끝남 상태 알림
         send_detector_data(client, status="detecting_finished", classType="resistor",
                            accord_x=30, accord_y=20)
@@ -126,7 +130,6 @@ def Detector_Client(client):
             startingDetect.start()
             startingDetect.join()
             isDetecting = False
-
 
 
 if (__name__ == "__main__"):
