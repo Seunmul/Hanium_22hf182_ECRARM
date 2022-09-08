@@ -7,7 +7,7 @@ const SocketTest = () => {
   const [isDetectionRunning, setDetectionRunning] = useState(false);
   const [items, setItems] = useState([]);
 
-  const webSocketUrl = `ws://192.168.0.13:8888`;
+  const webSocketUrl = `ws://155.230.25.98:8888`;
   let ws = useRef(null);
 
   const startButtonClickHandler = async () => {
