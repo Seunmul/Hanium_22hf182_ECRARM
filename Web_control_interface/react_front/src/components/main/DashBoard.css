@@ -1,0 +1,53 @@
+.dash-header {
+  align-items: center;
+  text-align: center;
+}
+
+.dash-badges {
+  display: flex;
+  flex-direction: column;
+  width: max-content
+}
+
+.dash-button-area {
+  display: flex;
+  min-width: 300px;
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.dash-buttons {
+  display: flex;
+  min-width: 300px;
+  width: 78%;
+  flex-direction: column;
+  flex-wrap: wrap;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.dash-button {
+  display: flex;
+  margin: 10px 0px;
+  padding: 0px;
+  min-width: 225px;
+  width: 11vw;
+  max-width: 350px;
+  min-height: 50px;
+  max-height: 100px;
+  height: 5vh;
+  font-size: 1.35rem;
+  font-weight: bolder;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
