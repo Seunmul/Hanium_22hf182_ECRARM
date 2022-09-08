@@ -1,17 +1,12 @@
-<<<<<<< HEAD
-# 22_hf182팀 개발코드
-
----
-## 프로젝트 설멍: 딥러닝 기반 객체인식 소자분류로봇 제작
-## Platform : Nvidia Jetson Tx2 , RaspberryPi, Python, Tensorflow, YOLOv4 .. etc
-
 
 =======
 # Hanium_22hf182_ECRARM
 ### 2022한이음 ICT공모전 소자분류로봇 개발 코드 
 ### Element Classification Robot Arm - Dev Codes
 ### Contributors : 김영희,박건하,이희원, 차우석 All rights reserved 
-
+---
+### 프로젝트 설멍: 딥러닝 기반 객체인식 소자분류로봇 제작
+### Platform : Nvidia Jetson Tx2 , RaspberryPi,
 
 개발언어 : python, c/c++, javascript
 -----
@@ -31,4 +26,3 @@ BackEnd : python 기반 Socket, WebSocket 라이브러리로 작성. 우선 외�
 추후에 goolge firebase 연동.
 
 FrontEnd : React
->>>>>>> 46a38dd8ede1595ee328b0a0e756af7152ce5646
