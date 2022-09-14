@@ -1,0 +1,20 @@
+.divider {
+    flex-shrink: 0;
+    width: 0.5em;
+    background-color: rgba(0, 0, 0, 0);
+    border: solid rgba(0, 0, 0, 0.15);
+    border-width: 1px 0;
+    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1),
+      inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
+  }
+
+  .divider-vertical {
+    flex-shrink: 0;
+    width:100%;
+    height: 0.5em;
+    background-color: rgba(0, 0, 0, 0);
+    border: solid rgba(0, 0, 0, 0.15);
+    border-width: 1px 0;
+    box-shadow: inset 0 0.5em 1.5em rgba(0, 0, 0, 0.1),
+      inset 0 0.125em 0.5em rgba(0, 0, 0, 0.15);
+  }

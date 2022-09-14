@@ -1,0 +1,33 @@
+.btn-si {
+    display: flex;
+    flex-flow: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 320px;
+    height: 46px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    background-color: #F4F4F7;
+    margin-bottom: 16px;
+}
+
+.login-icon {
+    /* margin-left:auto; */
+    width: 24px;
+    height: 24px;
+    margin: 10px 10px;
+    /* margin-right:60px; */
+}
+
+#login-icon-size {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+}
+
+#btn-si-ap {
+    margin-bottom: 48px;
+}
