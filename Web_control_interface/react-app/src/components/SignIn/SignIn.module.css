@@ -1,0 +1,52 @@
+.sign-in {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100vw;
+    height: 100vh;
+    /* max-height: ; */
+    min-height: 680px;
+    min-width: 320px;
+}
+
+.sign-in-loginbox {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    height: 834px;
+    padding-bottom:50px;
+}
+
+.sign-in-title {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items:center;
+}
+
+.cf-msg {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 320px;
+    height: 16.8px;
+    text-align: left;
+    font-size: 12px;
+    color: #F24957;
+    margin-bottom: 24px;
+}
+
+.rq-msg {
+    margin-top: 48px;
+    
+    width: 320px;
+    height: 46px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: normal;
+}
