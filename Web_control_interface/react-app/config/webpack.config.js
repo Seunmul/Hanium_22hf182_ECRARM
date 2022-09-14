@@ -570,6 +570,7 @@ module.exports = function (webpackEnv) {
           {
             inject: true,
             template: paths.appHtml,
+            filename: "../../templates/index.html",  //추가 된 라인 -> react app에게 어떤 path 인지 명시
           },
           isEnvProduction
             ? {
