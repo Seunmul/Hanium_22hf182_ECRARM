@@ -54,8 +54,13 @@ const resolveModule = (resolveFn, filePath) => {
 module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
+<<<<<<< HEAD:Web_control_interface/react_front/config/paths.js
+  // appBuild: resolveApp(buildPath), // 수정전
+  appBuild: resolveApp('../flask_back/static/react'), // 수정 후
+=======
   // appBuild: resolveApp(buildPath),
   appBuild: resolveApp('../flask-server/static/react'), // 수정 후
+>>>>>>> main:Web_control_interface/react-app/config/paths.js
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveModule(resolveApp, 'src/index'),
