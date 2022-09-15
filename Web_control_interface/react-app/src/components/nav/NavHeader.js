@@ -1,37 +1,6 @@
 import React from "react";
 
 const NavHeader = ({ menuSelected }) => {
-<<<<<<< HEAD:Web_control_interface/react_front/src/components/nav/NavHeader.js
-    let header = ""
-    switch (menuSelected) {
-        case 0:
-            header = "Home / Dashboard"
-            break;
-        case 1:
-            header = "Detail information"
-            break;
-        case 2:
-            header = "Control Panel"
-            break;
-        case 3:
-            header = "Program Info"
-            break;
-        default:
-            header = "error"
-            break;
-    }
-    return (
-        <span className="navigation-title">
-            <a href="/#">
-                <img
-                    className=" d-flex d-sm-none"
-                    src={process.env.PUBLIC_URL + '/img/ecrarm-logo.png'}
-                    alt="main logo" width="42" height="42" />
-            </a>
-            <div className="d-none d-sm-block " style={{ fontSize: "1.1rem" }}>{header}</div>
-        </span>
-    );
-=======
   let header = "";
   switch (menuSelected) {
     case 0:
@@ -74,7 +43,6 @@ const NavHeader = ({ menuSelected }) => {
       </a>
     </span>
   );
->>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/nav/NavHeader.js
 };
 
 export default NavHeader;
