@@ -2,10 +2,12 @@ import websockets
 import asyncio
 import json
 
-SOCKET_HOST = '127.0.0.1'
+# SOCKET_HOST = '127.0.0.1'
+SOCKET_HOST = '155.230.25.98'
 SOCKET_PORT = 9999
 
-WEBSOCKET_HOST = '127.0.0.1'
+# WEBSOCKET_HOST = '127.0.0.1'
+WEBSOCKET_HOST = '155.230.25.98'
 WEBSOCKET_PORT = 8888
 
 WEB_CLIENTS = []  # 서버에 접속한 클라이언트 목록
