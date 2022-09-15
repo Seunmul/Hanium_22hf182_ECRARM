@@ -11,13 +11,13 @@ def _STEP_SETUP_(PINS, FREQ=60, MOTOR_MODE=1):
     # set GPIO mode => BOARD, BOARD GPIO = physical GPIO
     GPIO.setmode(GPIO.BCM)
     INTERVAL_TIME = FREQ ** -1
-    MOTOR_PULSE = round(INTERVAL_TIME/2, 6)
+    STEP_PULSE_LEVEL_TIME = round(INTERVAL_TIME/2, 6)
 
     print("스텝모터 구동방식(풀스텝=1, 하프스텝=2 ...) : " + str(MOTOR_MODE))
     print("스텝모터 펄스 주파수 : " + str(round(FREQ, 3)) + "Hz")
     print("스텝모터 펄스 주기 : " + str(INTERVAL_TIME) + "sec")
     print("스텝모터 분당회전속도 : " + str(round(1.8/MOTOR_MODE/360*FREQ*60, 3)) + "rpm")
-    print("스텝모터 펄스레벨 변화주기 : " + str(MOTOR_PULSE)+"sec\n")
+    print("스텝모터 펄스레벨 변화주기 : " + str(STEP_PULSE_LEVEL_TIME)+"sec\n")
 
     # setup GPIO PINS
     for PIN in PINS:
@@ -25,20 +25,20 @@ def _STEP_SETUP_(PINS, FREQ=60, MOTOR_MODE=1):
         GPIO.setup(PIN, GPIO.OUT, initial=GPIO.LOW)
     # print("\nsetup completed\n")
 
-    return MOTOR_PULSE
+    return STEP_PULSE_LEVEL_TIME
 
 
-def _STEP_CONTROL_(AXIS, steps, dir, STEPPIN, DIRPIN, ENPIN, MOTOR_SPEED=0.0001):
+def _STEP_CONTROL_(AXIS, steps, dir, STEPPIN, DIRPIN, ENPIN, STEP_PULSE_LEVEL_TIME=0.0001):
     GPIO.output(DIRPIN, dir)
     GPIO.output(ENPIN, GPIO.LOW)  # set ENPIN LOW => start control
     print("CONTROL %s : START" % (AXIS))
     for i in range(0, int(steps)):
         GPIO.output(STEPPIN, GPIO.LOW)
-        time.sleep(MOTOR_SPEED)
+        time.sleep(STEP_PULSE_LEVEL_TIME)
         GPIO.output(STEPPIN, GPIO.HIGH)
-        time.sleep(MOTOR_SPEED)
+        time.sleep(STEP_PULSE_LEVEL_TIME)
     print("CONTROL %s : END" % (AXIS))
-    GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+    # GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
 
     return
 

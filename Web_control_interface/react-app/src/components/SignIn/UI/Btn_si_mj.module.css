@@ -1,0 +1,13 @@
+.btn-si-mj-320 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 320px;
+    height: 46px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #FFFFFF;
+    background-color: #525266;
+    margin-bottom: 16px;
+}

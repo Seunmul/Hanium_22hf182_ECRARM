@@ -1,0 +1,70 @@
+.dash-header {
+  align-items: center;
+  text-align: center;
+}
+
+.dash-badges {
+  display: flex;
+  flex-direction: column;
+  width: max-content
+}
+
+.dash-button-area {
+  display: flex;
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/main/DashBoard.css
+  min-width: 300px;
+=======
+  /* min-width: 300px; */
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/main/DashBoard.css
+  width: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.dash-buttons {
+  display: flex;
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/main/DashBoard.css
+  min-width: 300px;
+=======
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/main/DashBoard.css
+  width: 78%;
+  flex-direction: column;
+  flex-wrap: wrap;
+  text-align: center;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.dash-button {
+  display: flex;
+  margin: 10px 0px;
+  padding: 0px;
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/main/DashBoard.css
+  min-width: 225px;
+  width: 11vw;
+  max-width: 350px;
+  min-height: 50px;
+  max-height: 100px;
+  height: 5vh;
+  font-size: 1.35rem;
+  font-weight: bolder;
+=======
+  min-width: 260px;
+  max-width: 345px;
+  min-height: 50px;
+  max-height: 100px;
+  height: 5vh;
+  font-size: 1.5rem;
+  font-weight: bold;
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/main/DashBoard.css
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}

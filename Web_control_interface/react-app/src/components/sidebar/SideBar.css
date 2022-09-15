@@ -1,0 +1,87 @@
+.sidebar {
+  /* height: 354px; */
+  width: 20vw;
+  max-width: 280px;
+  min-width: 266px;
+  font-size: 1.2rem;
+}
+
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/sidebar/SideBar.css
+=======
+.sidebar > hr {
+  color: white;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  /* padding:0px; */
+}
+
+.small-sidebar > hr {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  /* padding:0px; */
+}
+
+#menu-active {
+  background-color: rgb(126, 155, 245);
+}
+
+.sidebar-item {
+  margin: 2px 0px;
+  transition: 0.3s;
+  border-radius: 6px;
+}
+
+.sidebar-item:hover {
+  background-color: rgb(126, 155, 245);
+  cursor: pointer;
+}
+
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/sidebar/SideBar.css
+.sidebar-icon {
+  display: flex;
+  justify-content: flex-start;
+  justify-items: center;
+  align-content: center;
+  align-items: center;
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/sidebar/SideBar.css
+=======
+  min-width: 266px;
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/sidebar/SideBar.css
+  height: 53.5px;
+}
+
+.small-sidebar {
+  width: 56px;
+}
+
+.small-sidebar-icon {
+  text-align: center;
+  height: 53.5px;
+}
+
+.toggleBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 56px;
+  height: 53.5px;
+  color: white;
+  transition: 0.3s;
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/sidebar/SideBar.css
+}
+
+.toggleBtn:hover {
+  background-color: #0D6EFD;
+  border:3px;
+  border-radius: 25px;
+=======
+  border-radius: 10px;
+}
+
+.toggleBtn:hover {
+  background-color: rgb(126, 155, 245);
+  border-radius: 33px;
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/sidebar/SideBar.css
+  cursor: pointer;
+}
