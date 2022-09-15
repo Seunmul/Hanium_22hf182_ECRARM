@@ -95,6 +95,7 @@ def _listener_(client):
     # receivedData 전역변수 사용
     global receivedData
     while True:
+
         try:
             # dictionary type으로 받기
             tempData = client.recv(1024)
@@ -124,7 +125,8 @@ def Controller_Client(client):
     isControlling = bool(False)
 
     while True:
-        if ((not isControlling)):
+        time.sleep(0.1)
+        if (not isControlling):
             isControlling = True
             startingControl = Thread(name="_control_", target=_control_,
                                      args=(client,), daemon=True)

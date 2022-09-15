@@ -123,7 +123,8 @@ def Detector_Client(client):
     isDetecting = bool(False)
 
     while True:
-        if ((not isDetecting)):
+        time.sleep(0.1)
+        if (not isDetecting):
             isDetecting = True
             startingDetect = Thread(name="_detect_", target=_detect_,
                                          args=(client,), daemon=True)

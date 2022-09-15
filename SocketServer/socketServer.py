@@ -44,7 +44,8 @@ def socket_thread(client, addr):
                 DISCONNECT_AND_STATUS_UPDATE(ECRARM_STATUS, str(addr))
                 for currentClient in clientList:
                     currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
-                print(f'>> Waiting...\n\n')
+            print(f'>> Waiting...\n\n')
+            break
 
         else:
             # print(f'{recivedData}')
@@ -53,7 +54,6 @@ def socket_thread(client, addr):
                                  DATA=recivedData["data"], updatingStatus=recivedData["status"])
             # 서버에 접속한 클라이언트들에게 브로드캐스팅
             for currentClient in clientList:
-                # if currentClient != client:
                 currentClient.send(SEND_STATUS(ECRARM_STATUS).encode())
 
 

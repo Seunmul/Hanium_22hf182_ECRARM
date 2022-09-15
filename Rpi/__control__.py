@@ -1,3 +1,7 @@
+#######################################################333
+# 각도는 + 방향이 앞으로 꺾이는 방향, 
+
+
 # Import RPi lib
 # import RPi.GPIO as GPIO
 
@@ -48,23 +52,56 @@ class Arm:
     INTERVAL_W, MIN_PWM_W, MAX_PWM_W = 0, 0, 0
     INTERVAL_R, MIN_PWM_R, MAX_PWM_R = 0, 0, 0
 
-    def __init__(self, init_degree):
+    def __init__(self):
         self.que = Queue()
-        self.cur_degree = init_degree
+        self.degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0} 
+        ##각도 기준
+        # x는 플레이트와 수직이 될 때(고정 필요해보임) ,yzw는 kinematics 의 각도를 기준, rh 추후 고려..!! 
+        ## 범위
+        # -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180
+        self.init_degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0}
         # self.PCA = PCA
         return
 
     def getCurDegree(self):
-        # print(self.cur_degree)
-        return self.cur_degree
+        # print(self.degree)
+        return self.degree
 
     def getDegreeQueue(self):
         return self.que
 
     def updateCurDegree(self):
         while self.que.empty() == False:
-            self.cur_degree.update(self.que.get())
-        return
+            self.degree.update(self.que.get())
+        return 
+
+    def _INIT_(self): # 무슨 각도에 있든지 초기 상태로 돌리는 함수
+        self._SERVO_CONTROL_("R", (self.init_degree.get('R')-self.degree.get('R')) , Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R)
+        self._SERVO_CONTROL_("W", (self.init_degree.get('W')-self.degree.get('W')) , Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W)
+        self._STEP_CONTROL_("Z", (self.init_degree.get('Z')-self.degree.get('Z')) , Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z)
+        self._STEP_CONTROL_("Y", (self.init_degree.get('Y')-self.degree.get('Y')) , Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y)
+        self._STEP_CONTROL_("X", (self.init_degree.get('X')-self.degree.get('X')) , Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X)
+        print("initializing complete! ")
+        self.updateCurDegree()
+        return    
+
+    # -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180
+    def checkAngle(self ,degree, AXIS) :
+        pre_degree = self.degree.get(AXIS)
+        angle = pre_degree + degree
+
+        if AXIS == 'X' and ( angle < -180  or angle > 180) :
+            return ( -180 - pre_degree ) if angle < -180 else ( 180 - pre_degree ) # 360 up re
+        elif AXIS == 'Y' and ( angle < 0  or angle > 180) :
+            return (0 - pre_degree) if angle < 0 else (180 - pre_degree)
+        elif AXIS == 'Z' and ( angle < -30  or angle > 90) :
+            return (-30 - pre_degree) if angle < -30 else (90 - pre_degree)
+        elif AXIS == 'W' and ( angle < 0 or angle > 180) :
+            return (0 - pre_degree) if  angle < 0 else (180 - pre_degree)
+        elif AXIS == 'R' and ( angle < 0  or angle > 180) :
+            return (0 - pre_degree) if angle < 0 else (180 - pre_degree) 
+        else :
+            return degree    
     # STEP ---------------------------------------------------------
 
     def _STEP_SETUP_(self, PINS=PINS, STEP_FREQ=STEP_FREQ, STEP_MODE=STEP_MODE,
@@ -103,11 +140,10 @@ class Arm:
         # 오차 방지를 위해 정수로 반올림
         return round(float(degree)*(int(self.STEP_MODE)/1.8), 0), dir
 
-    def _STEP_CONTROL_(self, AXIS, target_degree, STEPPIN, DIRPIN, ENPIN):
-        cur_degree = self.cur_degree.get(AXIS, "No current Axis")
-        target_degree = target_degree.get(AXIS, "No target Axis")
+    def _STEP_CONTROL_(self, AXIS, degree, STEPPIN, DIRPIN, ENPIN):
+        degree = self.checkAngle(degree, AXIS)
         steps, dir = self._DEGREE_TO_STEPS_(
-            target_degree-cur_degree)  # target degree가 크면 시계방향으로 회전
+            degree)  # target degree가 크면 시계방향으로 회전
         print("CONTROL %s : START || steps , dir - %s , %s" %
               (AXIS, steps, dir))
 
@@ -131,7 +167,8 @@ class Arm:
             # time.sleep(self.STEP_PULSE_LEVEL_TIME)
         print("CONTROL %s : END" % (AXIS))
         # GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
-        self.que.put({AXIS: target_degree})
+        change = degree + self.degree.get(AXIS)
+        self.que.put({AXIS: change})
         return
 
     # SERVO---------------------------------------------------------
@@ -146,65 +183,30 @@ class Arm:
         # print("%f %d %d\n" % (degree_per_interval, MIN, MAX))
         return degree_per_interval, MIN, MAX
 
-    def _SERVO_TO_MIN_PWM_(self, AXIS, channel_num, min_pwm, interval):
-        cur_degree = self.cur_degree.get(AXIS, "No current Axis")
-        print("MIN PWM %s AXIS " % (AXIS), end=" ")
-        cur_pwm = self._DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
-        while cur_pwm > min_pwm:
-            cur_pwm = cur_pwm - \
-                interval if((cur_pwm-interval) > min_pwm) else min_pwm
-            #self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
-            time.sleep(0.001)
-        print("min pwm : %d " % (cur_pwm))
-        self.que.put({AXIS: 0})
-        return cur_pwm
-
-    def _SERVO_TO_MAX_PWM_(self, AXIS, channel_num, min_pwm, max_pwm, interval):
-        cur_degree = self.cur_degree.get(AXIS, "No current Axis")
-        print("MAX PWM %s AXIS " % (AXIS), end=" ")
-        cur_pwm = self._DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
-        while cur_pwm < max_pwm:
-            cur_pwm = cur_pwm + \
-                interval if((cur_pwm+interval) < max_pwm) else max_pwm
-            #self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
-            time.sleep(0.001)
-        print("max pwm : %d " % (cur_pwm))
-        self.que.put({AXIS: 180})
-        return cur_pwm
-
-    def _SERVO_INITIAL_(self, AXIS, channel_num, min_pwm, max_pwm, interval):
-        cur_degree = self.cur_degree.get(AXIS, "No current Axis")
-        print("INITALIZE %s AXIS " % (AXIS))
-        cur_pwm = self._SERVO_TO_MIN_PWM_(
-            AXIS, channel_num, min_pwm, interval)
-        time.sleep(1)
-        cur_pwm = self._SERVO_TO_MAX_PWM_(
-            AXIS, channel_num, min_pwm, max_pwm, interval)
-        print("initial pwm : %s\n" % (cur_pwm))
-
-        return
-
-    def _SERVO_CONTROL_(self, AXIS, target_degree, channel_num, min_pwm, interval):
-        cur_degree = self.cur_degree.get(AXIS, "No current Axis")
-        target_degree = target_degree.get(AXIS, "No target Axis")
-
+    def _SERVO_CONTROL_(self, AXIS, degree, channel_num, min_pwm, interval):
         print("CONTROL %s : START" % (AXIS))
-        cur_pwm = self._DEGREE_TO_PWM_(interval, min_pwm, cur_degree)
-        target_pwm = self._DEGREE_TO_PWM_(interval, min_pwm, target_degree)
-        print("현재 | 목표 pwm :  %d | %d" % (cur_pwm, target_pwm))
-        if(cur_pwm < target_pwm):
-            while cur_pwm < target_pwm:
+        degree = self.checkAngle(degree, AXIS)
+        cur_pwm = self._DEGREE_TO_PWM_(interval, min_pwm, self.degree.get(AXIS))
+        pwm = self._DEGREE_TO_PWM_(interval, min_pwm, degree + self.degree.get(AXIS))
+        print("목표 pwm :  %d " % (pwm))
+        if(cur_pwm < pwm):
+            while cur_pwm < pwm:
                 cur_pwm = cur_pwm + interval \
-                    if((cur_pwm + interval) < target_pwm) else target_pwm
-                #self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
+                    if((cur_pwm + interval) < pwm) else pwm
+                #self.PCA.channels[channel_num].duty_cycle = int(pwm)
                 time.sleep(0.005)
-        elif(cur_pwm > target_pwm):
-            while cur_pwm > target_pwm:
+        elif(cur_pwm > pwm):
+            while cur_pwm > pwm:
                 cur_pwm = cur_pwm - interval \
-                    if((cur_pwm-interval) > target_pwm) else target_pwm
-                #self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
+                    if((cur_pwm-interval) > pwm) else pwm
+                #self.PCA.channels[channel_num].duty_cycle = int(pwm)
                 time.sleep(0.005)
+
+        print("check pwm : %d" % (pwm))
         print("CONTROL %s : END" % (AXIS))
-        print(cur_pwm)
-        self.que.put({AXIS: target_degree})
-        return cur_pwm
+
+        change = self.degree.get(AXIS) + degree
+        self.que.put({AXIS: change})
+        return 
+
+## 입력한 각도만큼 돌아가게 만듦
