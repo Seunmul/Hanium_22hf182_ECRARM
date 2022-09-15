@@ -23,11 +23,7 @@ const Footer = ({ style }) => {
             2022 Hanium ICT공모전 / 22hf_182 <br /> ©
             김영희.박건하.이희원.차우석 all right reserved
           </div>
-<<<<<<< HEAD:Web_control_interface/react_front/src/components/footer/Footer.js
-          <br/>
-=======
           <br />
->>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/footer/Footer.js
           <a
             href="https://www.flaticon.com/kr/free-icons/-"
             title="- 아이콘"
@@ -35,14 +31,10 @@ const Footer = ({ style }) => {
           >
             - 아이콘 제작자: Freepik - Flaticon
           </a>
-<<<<<<< HEAD:Web_control_interface/react_front/src/components/footer/Footer.js
-          <a href="https://www.fontspace.com/category/design">
-=======
           <a
             href="https://www.fontspace.com/category/design"
             style={{ fontSize: "5px" }}
           >
->>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/footer/Footer.js
             - title design : fontspace
           </a>
         </div>

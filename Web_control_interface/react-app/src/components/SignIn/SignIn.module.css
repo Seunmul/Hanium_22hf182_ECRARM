@@ -6,11 +6,7 @@
     align-items: center;
     text-align: center;
     width: 100vw;
-<<<<<<< HEAD:Web_control_interface/react_front/src/components/SignIn/SignIn.module.css
-    height: 93vh;
-=======
     height: 100vh;
->>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/SignIn/SignIn.module.css
     /* max-height: ; */
     min-height: 680px;
     min-width: 320px;
@@ -23,11 +19,7 @@
     justify-content: center;
     align-items: center;
     height: 834px;
-<<<<<<< HEAD:Web_control_interface/react_front/src/components/SignIn/SignIn.module.css
-    padding-bottom:100px;
-=======
     padding-bottom:50px;
->>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/SignIn/SignIn.module.css
 }
 
 .sign-in-title {
