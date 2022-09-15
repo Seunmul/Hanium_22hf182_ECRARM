@@ -8,4 +8,4 @@ def index(path):
     return render_template("index.html", flask_token="react  ")
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=13000)
+    app.run(host='0.0.0.0', port=80)
