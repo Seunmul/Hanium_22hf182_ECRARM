@@ -26,4 +26,4 @@ src
 
 ## 사용방법 
 react-app에서 npm run build 후
-flask-server에서 OpenDashboard.py 실행 -> 13000번 포트에 웹서버 열 수 있음.
+flask-server에서 OpenDashboard.py 실행 -> 80번 포트에 웹서버 열 수 있음.
