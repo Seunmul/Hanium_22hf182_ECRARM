@@ -12,8 +12,12 @@ const Main = ({ menuSelected }) => {
     width: "100%",
     height: "100%",
     marginTop: "10px",
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/main/Main.js
+    padding: "30px",
+=======
     padding: "15px",
     fontFamily:"Noto Sans"
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/main/Main.js
   };
   let main = <div></div>
   switch (menuSelected) {

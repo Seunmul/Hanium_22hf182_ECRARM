@@ -46,7 +46,11 @@ const SignIn = () => {
               아이디 혹은 비밀번호를 확인해주세요.
             </ValidMsg>
           </Input>
+<<<<<<< HEAD:Web_control_interface/react_front/src/components/SignIn/SignIn.js
+          <Link to="/" style={{ textDecorationLine: "none", color: "black" }}>
+=======
           <Link to="/App" style={{ textDecorationLine: "none", color: "black" }}>
+>>>>>>> 05cbcfc3e945d540d29636e0c36304db1441d59e:Web_control_interface/react-app/src/components/SignIn/SignIn.js
             <Btn style={{ marginTop: "24px" }} onClick={{ validHandler }}>
               로그인
             </Btn>

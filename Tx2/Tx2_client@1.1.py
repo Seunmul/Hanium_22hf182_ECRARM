@@ -3,8 +3,8 @@ from threading import Thread
 import socket
 import time
 
-HOST = '155.230.25.98'
-# HOST = '127.0.0.1'
+
+HOST = '127.0.0.1'
 PORT = 9999
 
 # receivedData 전역변수 선언
