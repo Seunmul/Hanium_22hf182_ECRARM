@@ -15,18 +15,18 @@ receivedData = {
         "connect": False,
         "data": {
             "class": "none",
-            "x": 0,
-            "y": 0
+            "x": "0",
+            "y": "0"
         }
     },
     "Controller": {
         "connect": True,
         "data": {
-            "X_Axis": 0,
-            "Y_Axis": 0,
-            "Z_Axis": 0,
-            "R_Axis": 0,
-            "W_Axis": 0
+            "X_Axis": "0",
+            "Y_Axis": "0",
+            "Z_Axis": "0",
+            "R_Axis": "0",
+            "W_Axis": "0"
         }
     },
     "Web": {
@@ -38,7 +38,7 @@ receivedData = {
 # detector의 데이터를 서버로 전송
 
 
-def send_detector_data(client, status: str, classType: str,  accord_x: float, accord_y: float):
+def send_detector_data(client, status: str, classType: str,  accord_x: str, accord_y: str):
     sendingData = json.dumps({
         "status": status,
         "from": "Detector",
@@ -81,7 +81,7 @@ def _detect_(client):
         # stopping status 시 리턴
         if (receivedData["status"] == "stopping"):
             send_detector_data(client, status="detecting_stopped", classType="resistor",
-                               accord_x=30, accord_y=20)
+                               accord_x=receivedData["Detector"]["data"]["x"], accord_y=receivedData["Detector"]["data"]["y"])
             return
         # detecting 끝남 상태 알림
         send_detector_data(client, status="detecting_finished", classType="resistor",
