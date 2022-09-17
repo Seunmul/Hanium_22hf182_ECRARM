@@ -48,18 +48,16 @@ class Arm:
     SLEEPTIME = 1  # 스텝모터 구동 간 sleep타임
 
     # sero control parms
-    PCA_CHANNEL_W, PCA_CHANNEL_R = 0, 1
+    PCA_CHANNEL_W, PCA_CHANNEL_R, PCA_CHANNEL_S = 0, 1, 2
     INTERVAL_W, MIN_PWM_W, MAX_PWM_W = 0, 0, 0
     INTERVAL_R, MIN_PWM_R, MAX_PWM_R = 0, 0, 0
+    INTERVAL_S, MIN_PWM_S, MAX_PWM_S = 0, 0, 0
 
     def __init__(self):
         self.que = Queue()
-        self.degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0} 
-        ##각도 기준
-        # x는 플레이트와 수직이 될 때(고정 필요해보임) ,yzw는 kinematics 의 각도를 기준, rh 추후 고려..!! 
-        ## 범위
-        # -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180
-        self.init_degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0}
+        self.degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0, "S" : 0 } 
+        self.init_degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0, "S" : 0}
+        self.sort_buckets = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
         # self.PCA = PCA
         return
 
@@ -178,10 +176,13 @@ class Arm:
             (interval*degree)
         return pwm
 
-    def _SERVO_SETUP_(self, MIN, MAX):
+    def _SERVO_SETUP_(self, MIN=0x07f5, MAX=0x1b6f):
         degree_per_interval = round(float(MAX-MIN)/180, 1)
         # print("%f %d %d\n" % (degree_per_interval, MIN, MAX))
-        return degree_per_interval, MIN, MAX
+        Arm.INTERVAL_W , Arm.INTERVAL_R, Arm.INTERVAL_S = degree_per_interval, degree_per_interval, degree_per_interval
+        Arm.MIN_PWM_W, Arm.MIN_PWM_R,  Arm.MIN_PWM_S = MIN, MIN, MIN
+        Arm.MAX_PWM_W , Arm.MAX_PWM_R,  Arm.MAX_PWM_S = MAX, MAX, MAX 
+        return 
 
     def _SERVO_CONTROL_(self, AXIS, degree, channel_num, min_pwm, interval):
         print("CONTROL %s : START" % (AXIS))
