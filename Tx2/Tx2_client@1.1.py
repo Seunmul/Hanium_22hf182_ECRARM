@@ -76,7 +76,7 @@ def _detect_(client):
                            accord_x=0, accord_y=0)
         # 작업 코드 추가하면됩니다....
         print("\n\n ---- Detecting Elements......---- \n\n")
-        time.sleep(5)
+        time.sleep(3)
         # 작업 코드
         # stopping status 시 리턴
         if (receivedData["status"] == "stopping"):

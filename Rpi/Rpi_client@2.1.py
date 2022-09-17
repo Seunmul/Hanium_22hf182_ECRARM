@@ -52,6 +52,7 @@ def send_connect_msg(client):
 
     }, sort_keys=True, indent=4)
     client.send(sendingData.encode())
+
     return
 
 # controller의 데이터를 서버로 전송
@@ -72,6 +73,7 @@ def send_controller_data(client, status: str, X: str, Y: str, Z: str, W: str, R:
     }, sort_keys=True, indent=4)
     # print(f'>> send Data : {sendingData}')
     client.send(sendingData.encode())
+
     return
 
 
@@ -117,20 +119,22 @@ def _control_(client, Arm):
         time.sleep(1)
         # 0. 제어 시간 체크 및 현재 각도 및 각도 제한 범위 표시
         start_time = time.time()
-        print(">> 현재 각도 : %s" % (Arm.getCurDegree()))
+        print(f">> 현재 각도 : {Arm.getCurDegree()}")
         print(">> 각도 제한 범위 : -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180 ")
-        # 1. 디텍터로부터 수신 데이터 확인 및 데이터 처리(x,y좌표계로 소요 각도 계산) 
+        # 1. 디텍터로부터 수신 데이터 확인 및 데이터 처리(x,y좌표계로 소요 각도 계산)
         print(f">> 디텍터 수신 데이터 : {receivedData['Detector']['data']}")
-        ### test value
+        # test value
         x_d = 1
         y_d = 1
         z_d = 1
         w_d = 1
         r_d = 1
+        print(
+            f'>> 이동 각도 : "X": {x_d}, "Y": {y_d}, "Z": {z_d}, "W": {w_d}, "R": {r_d}')
         # 2. 각도 계산 데이터를 활용하여 로봇팔 컨트롤 - __CONTROL__ THREAD : X ,Y, Z, W, R
-        ## 2-1. => 로봇 팔 x,y,z축 제어 => 대략적 위치 조정
-        ## 2-2. => 로봇 팔 w,r 축 및 그리퍼 제어 => 정밀한 위치 조정
-        ### 우선은 테스트 데이터만 날림
+        # 2-1. => 로봇 팔 x,y,z축 제어 => 대략적 위치 조정
+        # 2-2. => 로봇 팔 w,r 축 및 그리퍼 제어 => 정밀한 위치 조정
+        # 우선은 테스트 데이터만 날림
         X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
             "X", x_d, Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X))
         Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
@@ -197,6 +201,14 @@ def Controller_Client(client, Arm):
 
     # 컨트롤링 상태 지역변수 선언(컨트롤 중에는 true 상태 유지!)
     isControlling = bool(False)
+    # 초기 상태 전송
+    send_controller_data(client, status="initializing",
+                         X=str(Arm.getCurDegree()["X"]),
+                         Y=str(Arm.getCurDegree()["Y"]),
+                         Z=str(Arm.getCurDegree()["Z"]),
+                         W=str(Arm.getCurDegree()["W"]),
+                         R=str(Arm.getCurDegree()["R"]))
+    print(">> sending initial state degree...")
 
     while True:
         time.sleep(0.1)
