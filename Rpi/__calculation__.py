@@ -8,8 +8,8 @@ class CALCUL :
     HEIGHT=7.7
 
     def __init__(self):
-        self.i2c = busio.I2C(board.SCL0, board.SDA0)
-        self.vl53 = adafruit_vl53l0x.VL53L0X(i2c)
+        # self.i2c = busio.I2C(board.SCL0, board.SDA0)
+        # self.vl53 = adafruit_vl53l0x.VL53L0X(self.i2c)
         pass
 
     def detect_distance(self) :
