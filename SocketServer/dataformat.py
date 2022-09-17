@@ -11,19 +11,19 @@ ECRARM_STATUS = {
         "connect": False,  # True or False
         "data": {
             "class": "none",
-            "x": 0,
-            "y": 0
+            "x": "0",
+            "y": "0"
         }
     },
     "Controller": {
         "ip": "",
         "connect": False,  # True or False
         "data": {
-            "X_Axis": 0,
-            "Y_Axis": 0,
-            "Z_Axis": 0,
-            "W_Axis": 0,
-            "R_Axis": 0
+            "X_Axis": "0",
+            "Y_Axis": "0",
+            "Z_Axis": "0",
+            "W_Axis": "0",
+            "R_Axis": "0"
         }
     },
     "Web": {
@@ -102,7 +102,11 @@ def UPDATE_SYS_STATUS(ECRARM_STATUS: dict, updatingStatus):
         elif (updatingStatus == "stopping"):
             ECRARM_STATUS["status"] = updatingStatus
             print('>> [STATUS] stopping')
-
+        
+        elif (updatingStatus == "manual"):
+            ECRARM_STATUS["status"] = updatingStatus
+            print('>> [STATUS] manual controlling')
+        
         else:
             print('>> [STATUS] waiting web interface command ....')
     return
@@ -178,15 +182,15 @@ def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
     ECRARM_STATUS["status"] = sys_status[1]
     ECRARM_STATUS["Detector"]["data"] = {
         "class": "none",
-        "x": 0,
-        "y": 0
+        "x": "0",
+        "y": "0"
     }
     ECRARM_STATUS["Controller"]["data"] = {
-        "X_Axis": 0,
-        "Y_Axis": 0,
-        "Z_Axis": 0,
-        "W_Axis": 0,
-        "R_Axis": 0
+        "X_Axis": "0",
+        "Y_Axis": "0",
+        "Z_Axis": "0",
+        "W_Axis": "0",
+        "R_Axis": "0"
     }
     ECRARM_STATUS["Web"]["data"] = ""
     UPDATE_SYS_STATUS(ECRARM_STATUS, updatingStatus=sys_status[1])
