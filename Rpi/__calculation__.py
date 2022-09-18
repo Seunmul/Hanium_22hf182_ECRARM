@@ -1,26 +1,32 @@
 import math
-import board
-import busio
-import adafruit_vl53l0x
+# import matplotlib.pyplot as plt
+import numpy as np
+
+# import board
+# import busio
+# import adafruit_vl53l0x
 
 class CALCUL :
     CHECK_DIS = 1
     HEIGHT=7.7
 
     def __init__(self):
-        self.i2c = busio.I2C(board.SCL0, board.SDA0)
-        self.vl53 = adafruit_vl53l0x.VL53L0X(i2c)
+        # self.i2c = busio.I2C(board.SCL0, board.SDA0)
+        # self.vl53 = adafruit_vl53l0x.VL53L0X(i2c)
         pass
 
     def detect_distance(self) :
-        sum = 0
-        for _ in range(5) :
-            distance = self.vl53.range
-            sum += distance
-            print("Range: {0}mm".format(distance))
+        dis_list = []
         
-        # VL53L0X.detect_distance() 거리 5번 받아와서 평균 계산
-        return sum/5 
+        for _ in range(5) :
+            distance = self.vl53.range*0.1
+            dis_list.append(distance)
+            print("Range: {0}cm".format(distance))
+
+        dis_list.sort()
+        total = dis_list[1:-1]
+        
+        return sum(total)/len(total)
 
     def changeCoordinate(self,x,y):
         H = 10
@@ -32,25 +38,44 @@ class CALCUL :
         theta = math.degrees(theta)
         return R , theta
 
-    # trial and error 상당히 필요함
-    def calculAngle(self, R, HEIGHT) :
-        ROB_1 ,ROB_2  = 16, 17
+    def calculAngle(self, px, py, a1=16, a2=17):
+        rsul2 = (2*math.atan((math.sqrt(((((a1 + a2)**2) - (px**2 + py**2))/((px**2 + py**2)-((a1 - a2)**2))))))) # theta2 계산
+        if rsul2 < 0: # 결과값이 음수일 경우
+            theta2 = rsul2 # 양수로
+        else: # 결과값이 양수일 경우
+            theta2 = -rsul2 # 그대로
+        theta1 = math.atan(py/px ) - math.atan(((a2*math.sin(theta2))/(a1 + a2*math.cos(theta2)))) # 결과값
 
-        cos = ( math.pow(R,2) + math.pow(HEIGHT,2) - math.pow(ROB_1,2) - math.pow(ROB_2,2) ) / (2*ROB_1*ROB_2)
-        sin = - math.sqrt(1-math.pow(cos,2))
+        theta1 = theta1*180/math.pi
+        theta2 = theta2*180/math.pi 
 
-        theta2 = math.atan2(sin,cos) 
-        theta1 = math.atan2(HEIGHT, R) - math.atan2(ROB_1+ROB_2*math.cos(theta2),ROB_2*math.sin(theta2))
-        
-        theta1 = math.degrees(theta1)
-        theta2 = math.degrees(theta2)
-        theta2 = theta2 + 90 # theta2 가 음수라는 가정
-        theta3 = self.keepVertical(theta1, theta2)
+        # print("theta1:",math.degrees(theta1),"\n"+"theta2:", math.degrees(theta2)) # 결과값 출력
 
-        return theta1,theta2, theta3
+        theta3 = abs( theta1 + theta2 )
+        theta2 = theta2 + 90
 
-    def keepVertical(self, theta1, theta2):
-        return theta1+theta2
+        # x1 = a1*math.cos(theta1) # x1 좌표
+        # y1 = a1*math.sin(theta1) # y1 좌표
+        # x2 = x1 + a2*math.cos(theta1+theta2) # x2 좌표
+        # y2 = y1 + a2*math.sin(theta1+theta2) # y2 좌표
+
+        # plt.xlim(-30, 50) # plot할 x축 범위
+        # plt.ylim(-30, 50) # plot할 y축 범위
+        # plt.plot([0, x1, x2], [0, y1, y2], 'ro-') # plot할 좌표
+        # print("x1 = ", x1, "\ny1 = ", y1, "\nx2 = ", x2, "\ny2 = ", y2) # 결과값 출력
+        # plt.plot(px, py, 'bo') # plot할 좌표
+        # plt.show() # plot
+
+        return theta1 ,theta2, theta3
 
     def classification(self, element) :
         pass     
+
+if __name__ == '__main__':
+    C = CALCUL()
+    # print( str(C.calculAngle(25, 7)))
+    # print( str(C.changeCoordinate(-10, 10))) 
+    # print( str(C.changeCoordinate(10, 10))) 
+    C.detect_distance()
+
+
