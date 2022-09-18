@@ -129,6 +129,7 @@ def _control_(client, Arm):
         z_d = 1
         w_d = 1
         r_d = 1
+        s_d = 1
         print(
             f'>> 이동 각도 : "X": {x_d}, "Y": {y_d}, "Z": {z_d}, "W": {w_d}, "R": {r_d}')
         # 2. 각도 계산 데이터를 활용하여 로봇팔 컨트롤 - __CONTROL__ THREAD : X ,Y, Z, W, R
@@ -145,8 +146,10 @@ def _control_(client, Arm):
             "W", w_d, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W))
         R_axis = Thread(name="R_axis", target=Arm._SERVO_CONTROL_, args=(
             "R", r_d, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R))
+        S_axis = Thread(name="S_axis", target=Arm._SERVO_CONTROL_, args=(
+            "S", s_d, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S))    
         # 배열로 쓰레드 관리
-        Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis]
+        Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
         # start control thread
         for Axis in Axises:
             # print(Axis.name, end=" ")
@@ -227,10 +230,7 @@ if (__name__ == "__main__"):
         print("Arm_Control_initializing")
         print(Arm)
         Arm._STEP_SETUP_()
-        Arm.INTERVAL_W, Arm.MIN_PWM_W, Arm.MAX_PWM_W = Arm._SERVO_SETUP_(
-            MIN=0x07f5, MAX=0x1b6f)
-        Arm.INTERVAL_R, Arm.MIN_PWM_R, Arm.MAX_PWM_R = Arm._SERVO_SETUP_(
-            MIN=0x07f5, MAX=0x1b6f)
+        Arm._SERVO_SETUP_()
         Arm._INIT_()
 
         # 소켓 연결
