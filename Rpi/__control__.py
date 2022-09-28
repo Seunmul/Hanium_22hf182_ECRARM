@@ -27,24 +27,21 @@ def stepPinTimer(STEPPIN, GPIO_OUT, i):
 
 class Arm:
 
-    I2C_BUS=BUSIO.I2C(SCL, SDA)
-    PCA = PCA9685(I2C_BUS)  # Create a simple PCA9685 class instance.
-    PCA.frequency = 60  # Set the PWM frequency to 60hz.
-
     # step control pins
     STEPPIN_X, DIRPIN_X, ENPIN_X = 5, 6, 13  # BOARD 29 31 33
     STEPPIN_Y, DIRPIN_Y, ENPIN_Y = 12, 16, 20  # BOARD 32 36 38
     STEPPIN_Z, DIRPIN_Z, ENPIN_Z = 19, 26, 21  # BOARD 35 37 40
-    STEP_MODE_PIN = 14  # BOARD : 8
+    STEP_MODE_PIN_x = 14  # BOARD : 8
+    STEP_MODE_PIN_z = 17  # BOARD : 11
     STEP_VCC_PIN = 15  # BOARD : 10
 
     # step moter contorl params
-    STEP_MODE = 8  # step motor mode
-    STEP_FREQ = 300  # step moter signal frequency
+    STEP_MODE = 16  # step motor mode
+    STEP_FREQ = 500  # step moter signal frequency
     PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X,
             STEPPIN_Y, DIRPIN_Y, ENPIN_Y,
             STEPPIN_Z, DIRPIN_Z, ENPIN_Z,
-            STEP_MODE_PIN, STEP_VCC_PIN]
+            STEP_MODE_PIN_x, STEP_MODE_PIN_z, STEP_VCC_PIN]
     SLEEPTIME = 1  # 스텝모터 구동 간 sleep타임
 
     # sero control parms
@@ -54,11 +51,15 @@ class Arm:
     INTERVAL_S, MIN_PWM_S, MAX_PWM_S = 0, 0, 0
 
     def __init__(self):
+        I2C_BUS=BUSIO.I2C(SCL, SDA)
+        PCA = PCA9685(I2C_BUS)  # Create a simple PCA9685 class instance.
+        PCA.frequency = 60  # Set the PWM frequency to 60hz.
+
         self.que = Queue()
         self.degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0, "S" : 0 } 
         self.init_degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0, "S" : 0}
         self.sort_buckets = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
-        # self.PCA = PCA
+        self.PCA = PCA
         return
 
     def getCurDegree(self):
@@ -106,7 +107,7 @@ class Arm:
     # STEP ---------------------------------------------------------
 
     def _STEP_SETUP_(self, PINS=PINS, STEP_FREQ=STEP_FREQ, STEP_MODE=STEP_MODE,
-                     STEP_MODE_PIN=STEP_MODE_PIN, STEP_VCC_PIN=STEP_VCC_PIN):
+                     STEP_VCC_PIN=STEP_VCC_PIN):          
         
         print("\nSTEPMOTOR | setup.....")
         INTERVAL_TIME = STEP_FREQ ** -1
@@ -122,7 +123,8 @@ class Arm:
         # GPIO PIN number에 맞게 셋업 : GPIO.OUT / GPIO.IN
         for PIN in PINS:
             GPIO.setup(PIN, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.output(STEP_MODE_PIN, GPIO.HIGH)
+        GPIO.output(PINS[9], GPIO.HIGH)
+        GPIO.output(PINS[10], GPIO.HIGH)
         GPIO.output(STEP_VCC_PIN, GPIO.HIGH)
         self.STEP_PULSE_LEVEL_TIME = STEP_PULSE_LEVEL_TIME
         self.STEP_MODE = STEP_MODE
@@ -130,7 +132,7 @@ class Arm:
 
         # 각도=>스텝 수로 변환 // mode=>풀스텝 시 1, 하프스텝시 2 .... 마이크로스텝에 따라 8,16 ....
 
-    def _DEGREE_TO_STEPS_(self, degree):
+    def _DEGREE_TO_STEPS_(self, degree, AXIS):
         dir = 1
         # dir = GPIO.HIGH
         if(degree < 0):
@@ -138,36 +140,35 @@ class Arm:
             dir = GPIO.LOW
             dir = 0
 
+        steps = round(float(degree)*(int(self.STEP_MODE)/1.8), 0)
+        
+        # gear 에 따른 offset 
+        if AXIS == 'X' :
+            steps = steps * 9
+        elif AXIS == 'Y':
+            steps = steps * 6
+        elif AXIS == 'Z' :
+            steps = steps * 4.5
+
         # 오차 방지를 위해 정수로 반올림
-        return round(float(degree)*(int(self.STEP_MODE)/1.8), 0), dir
+        return steps , dir
 
     def _STEP_CONTROL_(self, AXIS, degree, STEPPIN, DIRPIN, ENPIN):
-        # degree = self.checkAngle(degree, AXIS)
+        degree = self.checkAngle(degree, AXIS)
         steps, dir = self._DEGREE_TO_STEPS_(
-            degree)  # target degree가 크면 시계방향으로 회전
+            degree, AXIS)  # target degree가 크면 시계방향으로 회전
         print("CONTROL %s : START || steps , dir - %s , %s" %
               (AXIS, steps, dir))
 
         GPIO.output(ENPIN, GPIO.LOW)
         GPIO.output(DIRPIN, dir)
-        for i in range(0, int(steps)):
-
-            on = Timer(self.STEP_PULSE_LEVEL_TIME,
-                       stepPinTimer, (STEPPIN, 1, i))
-            on.start()
-            on.join()
-
-            off = Timer(self.STEP_PULSE_LEVEL_TIME,
-                        stepPinTimer, (STEPPIN, 0, i))
-            off.start()
-            off.join()
-
+        for _ in range(0, int(steps)):
             GPIO.output(STEPPIN, GPIO.HIGH)
             time.sleep(self.STEP_PULSE_LEVEL_TIME)
             GPIO.output(STEPPIN, GPIO.LOW)
             time.sleep(self.STEP_PULSE_LEVEL_TIME)
         print("CONTROL %s : END" % (AXIS))
-        # GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
+        #  GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
         change = degree + self.degree.get(AXIS)
         self.que.put({AXIS: change})
         return
@@ -195,16 +196,16 @@ class Arm:
         print("목표 pwm :  %d " % (pwm))
         if(cur_pwm < pwm):
             while cur_pwm < pwm:
-                cur_pwm = cur_pwm + interval \
-                    if((cur_pwm + interval) < pwm) else pwm
-                #self.PCA.channels[channel_num].duty_cycle = int(pwm)
+                cur_pwm = cur_pwm + interval if((cur_pwm + interval) < pwm) else pwm
+                self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
                 time.sleep(0.005)
+                print("%d \n" , cur_pwm)
         elif(cur_pwm > pwm):
             while cur_pwm > pwm:
-                cur_pwm = cur_pwm - interval \
-                    if((cur_pwm-interval) > pwm) else pwm
-                #self.PCA.channels[channel_num].duty_cycle = int(pwm)
+                cur_pwm = cur_pwm - interval if((cur_pwm-interval) > pwm) else pwm
+                self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
                 time.sleep(0.005)
+                print("%d \n" , cur_pwm)
 
         print("check pwm : %d" % (pwm))
         print("CONTROL %s : END" % (AXIS))
