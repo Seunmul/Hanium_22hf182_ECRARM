@@ -4,15 +4,13 @@ import socket
 import time
 import sys
 import os
-import subprocess
 
 print(">> LOADING ML DETECITON MODEL ")
-#시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME - 현재 : /home/seunmul/바탕화면/inference/yolov7
-#export WORK_HOME= [yolov7 path로 지정.] 해당  path에 detect_custom.py 있어야함.
+#시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME
 sys.path.append(os.environ["WORK_HOME"])
 import detect_custom as dc
 
-#주소 불러오기
+#소켓 서버 주소 불러오기
 
 HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
@@ -92,22 +90,21 @@ def _detect_(client):
         # 작업 코드 추가하면됩니다....
         print("\n\n ---- Detecting Elements......---- \n\n")
 
-        ## 
-        # # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
-        # cap = dc.cv2.VideoCapture(0)
-        # if not cap.isOpened():
-        #     print("camera open failed")
-        #     return
-        # ret, img = cap.read()
-        # if not ret:
-        #     print("Can't read camera")
-        #     return
-        # img_captured = dc.cv2.imwrite('images/img_captured.jpg', img)
-        # cap.release()
+        # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
+        cap = dc.cv2.VideoCapture(0)
+        if not cap.isOpened():
+            print("camera open failed")
+            return
+        ret, img = cap.read()
+        if not ret:
+            print("Can't read camera")
+            return
+        img_captured = dc.cv2.imwrite('images/img_captured.jpg', img)
+        cap.release()
 
         # 모델 인퍼런스 실행.
-        source="images/bus.jpg"
-        # source="images/img_captured.jpg"
+        # source="images/bus.jpg"
+        source="images/img_captured.jpg"
         with dc.torch.no_grad():
             save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
         print(txt_path,end="\n")
@@ -183,22 +180,6 @@ def Detector_Client(client):
 if (__name__ == "__main__"):
 
     try:
-        # print(dc)
-        # print(dc.opt)
-        # while True :
-        #     source=input("입력소스 :")
-        #     with dc.torch.no_grad():
-        #         save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
-        #     print(txt_path,end="\n")
-        #     with open(txt_path+".txt", "r") as f:
-        #         lines = f.read().splitlines()
-        #         key=lines[0].split()
-        #         data=lines[-1].split()
-        #         print(data)
-        #         for i in range(0,len(key)):
-        #             detectedData[key[i]]=data[i]
-        #         print(detectedData)
-
         # 클라이언트 소켓 생성
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST, PORT))

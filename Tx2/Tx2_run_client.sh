@@ -11,5 +11,5 @@ fi
 
 echo $WORK_HOME
 cp detect_custom.py yolov7/
-python Tx2_client@2.2.py
+python Tx2_client@3.0.py
 #실행 안되면 python3 명령어로(리눅스,맥 등..)

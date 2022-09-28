@@ -28,3 +28,12 @@ yarn-error.log*
 *.ini*
 yolov7/
 traced_model.pt
+ECRARM_PY_ENV/Include
+ECRARM_PY_ENV/Lib
+ECRARM_PY_ENV/Scripts
+ECRARM_PY_ENV/share
+ECRARM_PY_ENV/pyvenv.cfg
+
+
+
+Tx2/runs/detect
