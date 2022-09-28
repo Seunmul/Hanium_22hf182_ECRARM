@@ -33,7 +33,10 @@ ECRARM_PY_ENV/Lib
 ECRARM_PY_ENV/Scripts
 ECRARM_PY_ENV/share
 ECRARM_PY_ENV/pyvenv.cfg
-
+ECRARM_PY_ENV/bin
+ECRARM_PY_ENV/include
+ECRARM_PY_ENV/lib
+ECRARM_PY_ENV/lib64
 
 
 Tx2/runs/detect

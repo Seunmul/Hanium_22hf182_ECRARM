@@ -84,52 +84,57 @@ def _detect_(client):
     global detectedData
     if (receivedData["status"] == "starting" or receivedData["status"] == "controlling_finished"):
         # detecting 중인 것을 서버에다가 알려야함.
-        send_detector_data(client,  status="detecting", classType="resistor",
-                           x=0, y=0)
+        send_detector_data(client,  status="detecting", classType="detecting",
+                           x="detecting", y="detecting")
         time.sleep(0.1)
         # 작업 코드 추가하면됩니다....
         print("\n\n ---- Detecting Elements......---- \n\n")
+        try :
+            # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
+            # cap = dc.cv2.VideoCapture(0)
+            # if not cap.isOpened():
+            #    print("camera open failed")
+            #    raise RuntimeError
+            # ret, img = cap.read()
+            # if not ret:
+            #    print("Can't read camera")
+            #    raise RuntimeError
+            # img_captured = dc.cv2.imwrite('images/img_captured.jpg', img)
+            # cap.release()
+            # 모델 인퍼런스 실행.
+            source="images/bus.jpg"
+            # source="images/img_captured.jpg"
+            with dc.torch.no_grad():
+                save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
+            print(txt_path,end="\n")
+            #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
+            with open(txt_path+".txt", "r") as f:
+                lines = f.read().splitlines()
+                key=lines[0].split()
+                data=lines[-1].split()
+                for i in range(0,len(key)):
+                    detectedData[key[i]]=data[i]
+                print(detectedData)
+        except Exception as e:
+            time.sleep(3)
+            #에러 발생 시
+            print(e)
+            print(">> Error ocuured during detecting.")
+            send_detector_data(client, status="stopping", classType="ERROR",
+                                   x="ERROR", y="ERROR")
+        else :
+            #json 파싱. 후 classType, x, y 변수에 저장 , 맨 마지막 라인의 값만!
+            time.sleep(3) # 인퍼런스 너무 빨라서 넣어놓음;;;
 
-        # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
-        cap = dc.cv2.VideoCapture(0)
-        if not cap.isOpened():
-            print("camera open failed")
-            return
-        ret, img = cap.read()
-        if not ret:
-            print("Can't read camera")
-            return
-        img_captured = dc.cv2.imwrite('images/img_captured.jpg', img)
-        cap.release()
-
-        # 모델 인퍼런스 실행.
-        # source="images/bus.jpg"
-        source="images/img_captured.jpg"
-        with dc.torch.no_grad():
-            save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
-        print(txt_path,end="\n")
-        #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
-        with open(txt_path+".txt", "r") as f:
-            lines = f.read().splitlines()
-            key=lines[0].split()
-            data=lines[-1].split()
-           
-            for i in range(0,len(key)):
-                detectedData[key[i]]=data[i]
-            print(detectedData)
-
-        #json 파싱. 후 classType, x, y 변수에 저장 , 맨 마지막 라인의 값만!
-        time.sleep(5) # 인퍼런스 너무 빨라서 넣어놓음;;;
-        
-        # 작업 코드
-        # stopping status 시 리턴
-        if (receivedData["status"] == "stopping"):
-            send_detector_data(client, status="detecting_stopped", classType=detectedData["class"],
-                               x=detectedData["x"], y=detectedData["y"])
-            return
-        # detecting 끝남 상태 알림
-        send_detector_data(client, status="detecting_finished", classType=detectedData["class"],
-                               x=detectedData["x"], y=detectedData["y"])
+            # 작업 코드
+            # stopping status 시 리턴
+            if (receivedData["status"] == "stopping"):
+                send_detector_data(client, status="detecting_stopped", classType=detectedData["class"],
+                                   x=detectedData["x"], y=detectedData["y"])
+                return
+            # detecting 끝남 상태 알림
+            send_detector_data(client, status="detecting_finished", classType=detectedData["class"],
+                                   x=detectedData["x"], y=detectedData["y"])
     return
 
 

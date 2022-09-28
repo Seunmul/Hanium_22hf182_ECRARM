@@ -32,10 +32,16 @@ FrontEnd : React
 ----
 #### 가상환경 설정 방법
 venv 사용하는데,
-테스트용도로만 사용하시고 torch, torchvision, opencv 등은 직접 빌드하시는 걸 추천드립니다.
-
+테스트용도로만 사용하시고 torch, torchvision, opencv 등은 직접 빌드해주세요
+[CUDA를 사용하시는 경우에는 문제가 발생합니다.]
+(윈도우)
 python -m venv ECRARM_PY_ENV
 source ECRARM_PY_ENV/Scripts/activate
+pip install -r requirements.txt
+
+(리눅스)
+python -m venv ECRARM_PY_ENV
+source ECRARM_PY_ENV/bin/activate
 pip install -r requirements.txt
 
 하고 실행하시면 됩니다.
@@ -44,3 +50,9 @@ pip install -r requirements.txt
 
 venv관련해서 찾아보시고 사용해주세요. 
 로컬에서 사용하셔도 상관 없습니다.
+
+아, 추가적으로 해당 requirements에는 torch와 opencv등 무거운 패키지들이 포함되어 있으므로
+ML을 사용하지 않고 테스트 하실 때에는 해당 패키지들을 지워주시면 되며
+라즈베리파이 RPi.GPIO, adafruit 제조사에서 제공하는 패키지들은 따로 깃허브에서 다운로드 해주세요.
+
+또한, React 패키지 역시 따로 관리가 필요합니다. 이 패키지들은 python 파일 dependency만 관리합니다.
