@@ -4,6 +4,7 @@ import socket
 import time
 import sys
 import os
+import subprocess
 
 print(">> LOADING ML DETECITON MODEL ")
 #시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME - 현재 : /home/seunmul/바탕화면/inference/yolov7
