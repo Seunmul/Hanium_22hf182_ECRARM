@@ -1,12 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
 /.pnp
 .pnp.js
 *.ini
+/node_modules
 node_modules/
-Web_control_interface/flask_back/static/legacy/assets/
+
 # testing
 /coverage
 
@@ -26,7 +26,5 @@ yarn-error.log*
 
 #custom
 *.ini*
-/yolov7
 yolov7/
 traced_model.pt
-*.pt
