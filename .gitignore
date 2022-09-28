@@ -23,4 +23,10 @@ Web_control_interface/flask_back/static/legacy/assets/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#custom
 *.ini*
+/yolov7
+yolov7/
+traced_model.pt
+*.pt

@@ -109,8 +109,7 @@ def _detect_(client):
         with dc.torch.no_grad():
             save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
         print(txt_path,end="\n")
-        #txt파일 불러와서 detectedData 변수에 저장 
-        #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
+        #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
         with open(txt_path+".txt", "r") as f:
             lines = f.read().splitlines()
             key=lines[0].split()
@@ -121,7 +120,7 @@ def _detect_(client):
             print(detectedData)
 
         #json 파싱. 후 classType, x, y 변수에 저장 , 맨 마지막 라인의 값만!
-        time.sleep(1) # 인퍼런스 너무 빨라서 넣어놓음';;;
+        time.sleep(1) # 인퍼런스 너무 빨라서 넣어놓음;;;
         
         # 작업 코드
         # stopping status 시 리턴
