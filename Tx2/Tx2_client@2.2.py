@@ -121,7 +121,7 @@ def _detect_(client):
             print(detectedData)
 
         #json 파싱. 후 classType, x, y 변수에 저장 , 맨 마지막 라인의 값만!
-
+        time.sleep(1) # 인퍼런스 너무 빨라서 넣어놓음';;;
         
         # 작업 코드
         # stopping status 시 리턴
