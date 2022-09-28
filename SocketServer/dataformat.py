@@ -199,6 +199,7 @@ def INITIALIZE_DATA_STATUS(ECRARM_STATUS: dict):
 
 
 if (__name__ == "__main__"):
+    print("dataformat.py")
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
-    UPDATE_ECRARM_STATUS("127.0.0.1", "Detector", "connect", False)
+    # UPDATE_ECRARM_STATUS("127.0.0.1", "Detector", "connect", False)
     # print(json.dumps(ECRARM_STATUS, sort_keys=True, indent=4))
