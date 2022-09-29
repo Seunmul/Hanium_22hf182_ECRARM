@@ -91,19 +91,26 @@ def _detect_(client):
         print("\n\n ---- Detecting Elements......---- \n\n")
         try :
             # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
-            # cap = dc.cv2.VideoCapture(0)
-            # if not cap.isOpened():
-            #    print("camera open failed")
-            #    raise RuntimeError
-            # ret, img = cap.read()
-            # if not ret:
-            #    print("Can't read camera")
-            #    raise RuntimeError
-            # img_captured = dc.cv2.imwrite('images/img_captured.jpg', img)
-            # cap.release()
+            cap = dc.cv2.VideoCapture(0)
+            if not cap.isOpened():
+               print("camera open failed")
+               raise RuntimeError
+            ret, img = cap.read()
+            if not ret:
+               print("Can't read camera")
+               raise RuntimeError
+
+            crop_img = img[120:-120,160:-160]
+            scaleX = 2
+            scaleY = 2
+            scaleUp_img = dc.cv2.resize(crop_img, None, fx=scaleX, fy=scaleY, interpolation = dc.cv2.INTER_CUBIC)
+
+            img_captured = dc.cv2.imwrite('images/img_captured.jpg', scaleUp_img)
+
+            cap.release()
             # 모델 인퍼런스 실행.
-            source="images/bus.jpg"
-            # source="images/img_captured.jpg"
+            # source="images/bus.jpg"
+            source="images/img_captured.jpg"
             with dc.torch.no_grad():
                 save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
             print(txt_path,end="\n")
@@ -115,6 +122,11 @@ def _detect_(client):
                 for i in range(0,len(key)):
                     detectedData[key[i]]=data[i]
                 print(detectedData)
+        except FileNotFoundError as e:
+            # time.sleep(2)
+            print("\n아무것도 인식되지 않았습니다. 프로그램을 종료합니다. \n")
+            send_detector_data(client, status="initializing", classType="FINISHED",
+                                   x="FINISHED", y="FINISHED")
         except Exception as e:
             time.sleep(3)
             #에러 발생 시
@@ -124,7 +136,7 @@ def _detect_(client):
                                    x="ERROR", y="ERROR")
         else :
             #json 파싱. 후 classType, x, y 변수에 저장 , 맨 마지막 라인의 값만!
-            time.sleep(3) # 인퍼런스 너무 빨라서 넣어놓음;;;
+            # time.sleep(1) # 인퍼런스 너무 빨라서 넣어놓음;;;
 
             # 작업 코드
             # stopping status 시 리턴
