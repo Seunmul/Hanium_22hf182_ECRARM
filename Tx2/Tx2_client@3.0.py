@@ -91,7 +91,7 @@ def _detect_(client):
         print("\n\n ---- Detecting Elements......---- \n\n")
         try :
             # cv2로 이미지 캡쳐 = > 저장 후 image_path를 source로 전달.
-            cap = dc.cv2.VideoCapture(0)
+            cap = dc.cv2.VideoCapture(1)
             if not cap.isOpened():
                print("camera open failed")
                raise RuntimeError
@@ -105,7 +105,7 @@ def _detect_(client):
             scaleY = 2
             scaleUp_img = dc.cv2.resize(crop_img, None, fx=scaleX, fy=scaleY, interpolation = dc.cv2.INTER_CUBIC)
 
-            img_captured = dc.cv2.imwrite('images/img_captured.jpg', scaleUp_img)
+            img_captured = dc.cv2.imwrite('images/img_captured.jpg', scaleUp_img,params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
 
             cap.release()
             # 모델 인퍼런스 실행.
