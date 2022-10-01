@@ -23,17 +23,17 @@ if __name__ == "__main__":
 
         while True:
             X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
-                "X", theta0 , Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X))
+                "X", theta0 , Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X), daemon=True)
             Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
-                "Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y))
+                "Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y), daemon=True)
             Z_axis = Thread(name="Z_axis", target=Arm._STEP_CONTROL_, args=(
-                "Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z))
+                "Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z), daemon=True)
             W_axis = Thread(name="W_axis", target=Arm._SERVO_CONTROL_, args=(
-                "W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W))
+                "W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W), daemon=True)
             R_axis = Thread(name="R_axis", target=Arm._SERVO_CONTROL_, args=(
-                "R", theta4, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R))
+                "R", theta4, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R), daemon=True)
             S_axis = Thread(name="S_axis", target=Arm._SERVO_CONTROL_, args=(
-                "S", theta5, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S))    
+                "S", theta5, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S), daemon=True)    
             Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
 
             # txt 파일로 입력받음

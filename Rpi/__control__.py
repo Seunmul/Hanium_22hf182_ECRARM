@@ -31,8 +31,8 @@ class Arm:
     STEPPIN_X, DIRPIN_X, ENPIN_X = 5, 6, 13  # BOARD 29 31 33
     STEPPIN_Y, DIRPIN_Y, ENPIN_Y = 12, 16, 20  # BOARD 32 36 38
     STEPPIN_Z, DIRPIN_Z, ENPIN_Z = 19, 26, 21  # BOARD 35 37 40
-    STEP_MODE_PIN_x = 14  # BOARD : 8
-    STEP_MODE_PIN_z = 17  # BOARD : 11
+    STEP_MODE_PIN_X = 14  # BOARD : 8
+    STEP_MODE_PIN_Z = 17  # BOARD : 11
     STEP_VCC_PIN = 15  # BOARD : 10
 
     # step moter contorl params
@@ -41,7 +41,7 @@ class Arm:
     PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X,
             STEPPIN_Y, DIRPIN_Y, ENPIN_Y,
             STEPPIN_Z, DIRPIN_Z, ENPIN_Z,
-            STEP_MODE_PIN_x, STEP_MODE_PIN_z, STEP_VCC_PIN]
+            STEP_MODE_PIN_X, STEP_MODE_PIN_Z, STEP_VCC_PIN]
     SLEEPTIME = 1  # 스텝모터 구동 간 sleep타임
 
     # sero control parms
@@ -171,6 +171,7 @@ class Arm:
         #  GPIO.output(ENPIN, GPIO.HIGH)  # set ENPIN HIGH
         change = degree + self.degree.get(AXIS)
         self.que.put({AXIS: change})
+        GPIO.output(ENPIN, GPIO.LOW)
         return
 
     # SERVO---------------------------------------------------------
