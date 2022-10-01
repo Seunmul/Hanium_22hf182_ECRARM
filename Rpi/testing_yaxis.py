@@ -35,12 +35,12 @@ if __name__ == "__main__":
 
             # 중간관절
             Axises[0].start()
-            Axises[0].join()
             Axises[1].start()
-            Axises[1].join()
             Axises[2].start()
-            Axises[2].join()
             Axises[3].start()
+            Axises[0].join()
+            Axises[1].join()
+            Axises[2].join()
             Axises[3].join()
             Arm.updateCurDegree()
             
