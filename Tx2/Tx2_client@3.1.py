@@ -226,6 +226,7 @@ def Load_Camera(index:int):
     w = capture.get(dc.cv2.CAP_PROP_FRAME_WIDTH)
     h = capture.get(dc.cv2.CAP_PROP_FRAME_HEIGHT)
     print("변환된 동영상 너비(가로) : {}, 높이(세로) : {}".format(w, h))
+    print("카메라 로드 완료.")
 
     
     while True:
@@ -254,20 +255,20 @@ if (__name__ == "__main__"):
     try:
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
-                          args=(2,), daemon=True)
+                          args=(0,), daemon=True)
         camera_listener.start()
         
         # 클라이언트 소켓 생성
-        # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # client.connect((HOST, PORT))
-        # print('>> Connect Server')
-        # send_connect_msg(client)
-        # Listener = Thread(name="_listener_", target=_listener_,
-        #                   args=(client,), daemon=True)
-        # Listener.start()
-        # Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
-        #                                 args=(client,), daemon=True)
-        # Detector_Client_thread.start()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((HOST, PORT))
+        print('>> Connect Server')
+        send_connect_msg(client)
+        Listener = Thread(name="_listener_", target=_listener_,
+                          args=(client,), daemon=True)
+        Listener.start()
+        Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
+                                        args=(client,), daemon=True)
+        Detector_Client_thread.start()
 
         while True:
             inputData = input('')
