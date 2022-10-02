@@ -1,3 +1,4 @@
+from __control__ import GPIO
 from __control__ import Arm
 from __calculation__ import CALCUL
 
@@ -6,6 +7,14 @@ import json
 import socket
 import time
 from threading import Thread
+
+# element class
+# 0: IC chip
+# 1: LED
+# 2: capacitor
+# 3: resistor
+# 4: transistor
+
 
 HOST = '155.230.25.98'
 # HOST = '127.0.0.1'
@@ -106,6 +115,42 @@ def _listener_(client):
             print(e)
             print("잘못된 정보를 수신하였습니다.")
 
+# 준비상태
+
+# arm control
+def _arm_control_(Arm, theta0, theta1, theta2, theta3, theta4, theta5):
+    # 0. 제어 시간 체크 
+    start_time = time.time()
+    print("현재 각도 : " + str(Arm.getCurDegree()))
+    X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
+        "X", theta0, Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
+    Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
+        "Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y,), daemon=True)
+    Z_axis = Thread(name="Z_axis", target=Arm._STEP_CONTROL_, args=(
+        "Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z,), daemon=True)
+    W_axis = Thread(name="W_axis", target=Arm._SERVO_CONTROL_, args=(
+        "W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,), daemon=True)
+    R_axis = Thread(name="R_axis", target=Arm._SERVO_CONTROL_, args=(
+        "R", theta4, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R,), daemon=True)
+    S_axis = Thread(name="S_axis", target=Arm._SERVO_CONTROL_, args=(
+        "S", theta5, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S,), daemon=True)
+
+    Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
+
+    # start control thread
+    for Axis in Axises:
+        # print(Axis.name, end=" ")
+        Axis.start()
+    # wait control thread
+    for Axis in Axises:
+        Axis.join()
+    
+    # 소요 시간 및 현재 각도 출력
+    print(f">> {time.time() - start_time} seconds" )
+    print(f">> 현재 각도 : {Arm.getCurDegree()}")
+    Arm.updateCurDegree()
+    return
+
 # 컨트롤
 def _control_(client, Arm):
     # receivedData 전역변수 사용
@@ -122,49 +167,46 @@ def _control_(client, Arm):
         # 작업 코드 추가하면됩니다....
         print("\n\n>> Controlling Arms .----")
         time.sleep(1)
-        # 0. 제어 시간 체크 및 현재 각도 및 각도 제한 범위 표시
-        start_time = time.time()
-        print(f">> 현재 각도 : {Arm.getCurDegree()}")
+
         print(">> 각도 제한 범위 : -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180 ")
 
         # 1. 디텍터로부터 수신 데이터 확인 및 데이터 처리(x,y좌표계로 소요 각도 계산)
         print(f">> 디텍터 수신 데이터 : {receivedData['Detector']['data']}")
-
+        if(int(receivedData['Detector']['data']['class'])==0):
+            print(">>IC CHIP")
+            x_d = 45
+        elif(int(receivedData['Detector']['data']['class'])==1):
+            print(">>LED")
+            x_d = 90
+        elif(int(receivedData['Detector']['data']['class'])==2):
+            print(">>Capacitor")
+            x_d = 135
+        elif(int(receivedData['Detector']['data']['class'])==3):
+            print(">>Resistor")
+            x_d = -45
+        elif(int(receivedData['Detector']['data']['class'])==4):
+            print(">>Transistor")
+            x_d = -90
         # test value
-        x_d = 1
         y_d = 1
         z_d = 1
         w_d = 1
         r_d = 1
         s_d = 1
+
         print(
             f'>> 이동 각도 : "X": {x_d}, "Y": {y_d}, "Z": {z_d}, "W": {w_d}, "R": {r_d}')
         # 2. 각도 계산 데이터를 활용하여 로봇팔 컨트롤 - __CONTROL__ THREAD : X ,Y, Z, W, R
         # 2-1. => 로봇 팔 x,y,z축 제어 => 대략적 위치 조정
-
+        _arm_control_(Arm, theta0=x_d, theta1=0,theta2=0,theta3=0,theta4=0,theta5=0)
         # 2-2. => 로봇 팔 w,r 축 및 그리퍼 제어 => 정밀한 위치 조정
 
         # 우선은 테스트 데이터만 날림
 
-        # 배열로 쓰레드 관리
-        Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
-        # start control thread
-        for Axis in Axises:
-            # print(Axis.name, end=" ")
-            Axis.start()
-        # wait control thread
-        for Axis in Axises:
-            Axis.join()
-        # update current degree
-        Arm.updateCurDegree()  # 내부 degree 업데이트
-        # 소요 시간 출력
-        print(">> %s seconds ---" % (time.time() - start_time))
-        time.sleep(3)
-
-
         print(">> Controlling finished")
-        print(">> 제어 후  현재 각도 : %s" % (Arm.getCurDegree()))
-        print(Arm.getCurDegree()["X"])
+        # print(">> 제어 후  현재 각도 : %s" % (Arm.getCurDegree()))
+        # print(Arm.getCurDegree()["X"])
+        _arm_control_(Arm, theta0=-x_d, theta1=0,theta2=0,theta3=0,theta4=0,theta5=0)
 
         ##### 실행 중 stopping status 시 리턴,  나중에 curDegree값을 전송해주면 됨. #####
         if (receivedData["status"] == "stopping"):
@@ -204,34 +246,8 @@ def Controller_Client(client, Arm):
 
     # 컨트롤링 상태 지역변수 선언(컨트롤 중에는 true 상태 유지!)
     isControlling = bool(True)
-
-    # 준비상태로 가기 : 0 , -60, 0, 60 ,0, 0
-    print("현재 각도 : " + str(Arm.getCurDegree()))
-    theta0, theta1, theta2, theta3, theta4, theta5 = 0, -60, 0, 60, 0, 0
-    X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
-        "X", theta0, Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
-    Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
-        "Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y,), daemon=True)
-    Z_axis = Thread(name="Z_axis", target=Arm._STEP_CONTROL_, args=(
-        "Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z,), daemon=True)
-    W_axis = Thread(name="W_axis", target=Arm._SERVO_CONTROL_, args=(
-        "W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,), daemon=True)
-    R_axis = Thread(name="R_axis", target=Arm._SERVO_CONTROL_, args=(
-        "R", theta4, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R,), daemon=True)
-    S_axis = Thread(name="S_axis", target=Arm._SERVO_CONTROL_, args=(
-        "S", theta5, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S,), daemon=True)
-        
-    Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
-    
-    # start control thread
-    for Axis in Axises:
-        # print(Axis.name, end=" ")
-        Axis.start()
-    # wait control thread
-    for Axis in Axises:
-        Axis.join()
-    Arm.updateCurDegree()
-    print("현재 각도 : " + str(Arm.getCurDegree()))
+    # 준비상태로 가기 : 0 , -60, 0, 70 ,0, 0
+    _arm_control_(Arm, 0, -60, 40, 60, 0, 0)
 
     isControlling = bool(False)
     # 초기 상태 전송
@@ -259,6 +275,7 @@ if (__name__ == "__main__"):
         # 로봇팔 초기화
         print("Arm_Control_initializing")
         print(Arm)
+        GPIO.cleanup()
         Arm._STEP_SETUP_()
         Arm._SERVO_SETUP_()
         Arm._INIT_()
@@ -296,6 +313,8 @@ if (__name__ == "__main__"):
         # 종료 시 로봇팔 초기화
         print("\n\nback to initialize state...")
         Arm._INIT_()
+        print("PINS OFF")
+        Arm._STEP_OFF_() 
         print(Arm.getCurDegree())
         print("End")
         client.close()
