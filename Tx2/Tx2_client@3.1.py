@@ -5,6 +5,7 @@ import time
 import sys
 import os
 import matplotlib.pyplot as plt
+import matplotlib.image as img
 
 print(">> LOADING ML DETECITON MODEL ")
 #시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME
@@ -98,6 +99,7 @@ def _detect_(client):
         # 작업 코드 추가하면됩니다....
         print("\n\n ---- Detecting Elements......---- \n\n")
         try :
+        
             #FRAME 전역변수로부터 이미지 소스 캡쳐
             dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
 
@@ -109,9 +111,9 @@ def _detect_(client):
             print(txt_path,end="\n")
             
             #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
-            image = dc.cv2.imread(save_path+"img_captured.jpg")
-            plt.imshow(image[0][...,::-1])
-            plt.axis('off')
+            print("show deteted image")
+            image = dc.cv2.imread(save_path)
+            dc.cv2.imshow('detected',image)
 
             with open(txt_path+".txt", "r") as f:
                 lines = f.read().splitlines()
@@ -255,25 +257,8 @@ if (__name__ == "__main__"):
         camera_index = 0
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
-                          args=(int(camera_index),), daemon=True)
+                          args=(0,), daemon=True)
         camera_listener.start()
-        
-        ##
-        #FRAME 전역변수로부터 이미지 소스 캡쳐
-        dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
-        # 모델 인퍼런스 실행.
-        # source="images/bus.jpg"
-        source="images/img_captured.jpg"
-        with dc.torch.no_grad():
-            save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
-        print(txt_path,end="\n")
-        
-        #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
-        image = dc.cv2.imread(save_path+"img_captured.jpg")
-        plt.imshow(image[0][...,::-1])
-        plt.axis('off')
-        ##
-
 
         # # 클라이언트 소켓 생성
         # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -306,6 +291,7 @@ if (__name__ == "__main__"):
     except KeyboardInterrupt as e:
         print('강제종료', e)
     finally:
-
+        # cv2창종료
+        dc.cv2.destroyAllWindows()
         # 모든 창 닫기
         client.close()
