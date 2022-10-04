@@ -4,7 +4,6 @@ import socket
 import time
 import sys
 import os
-import matplotlib.pyplot as plt
 from PIL import Image
 
 print(">> LOADING ML DETECITON MODEL ")
@@ -114,7 +113,6 @@ def _detect_(client):
             print("show deteted image")
             img = Image.open(save_path)
             img.show()
-            time.sleep(1)
             
             with open(txt_path+".txt", "r") as f:
                 lines = f.read().splitlines()
@@ -154,7 +152,6 @@ def _detect_(client):
             if (receivedData["status"] == "stopping"):
                 send_detector_data(client, status="detecting_stopped", classType=detectedData["class"],
                                    x=detectedData["x"], y=detectedData["y"])
-                
                 return
             # detecting 끝남 상태 알림
             send_detector_data(client, status="detecting_finished", classType=detectedData["class"],
@@ -258,10 +255,10 @@ if (__name__ == "__main__"):
         camera_index = 0
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
-                          args=(0,), daemon=True)
+                          args=(camera_index,), daemon=True)
         camera_listener.start()
 
-        # # 클라이언트 소켓 생성
+        ## 클라이언트 소켓 생성
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST, PORT))
         print('>> Connect Server')
@@ -292,7 +289,5 @@ if (__name__ == "__main__"):
     except KeyboardInterrupt as e:
         print('강제종료', e)
     finally:
-        # cv2창종료
-        dc.cv2.destroyAllWindows()
         # 모든 창 닫기
         client.close()
