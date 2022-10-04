@@ -5,7 +5,7 @@ import time
 import sys
 import os
 import matplotlib.pyplot as plt
-import matplotlib.image as img
+from PIL import Image
 
 print(">> LOADING ML DETECITON MODEL ")
 #시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME
@@ -112,9 +112,10 @@ def _detect_(client):
             
             #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
             print("show deteted image")
-            image = dc.cv2.imread(save_path)
-            dc.cv2.imshow('detected',image)
-
+            img = Image.open(save_path)
+            img.show()
+            time.sleep(1)
+            
             with open(txt_path+".txt", "r") as f:
                 lines = f.read().splitlines()
                 ## key 탐색
@@ -261,16 +262,16 @@ if (__name__ == "__main__"):
         camera_listener.start()
 
         # # 클라이언트 소켓 생성
-        # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # client.connect((HOST, PORT))
-        # print('>> Connect Server')
-        # send_connect_msg(client)
-        # Listener = Thread(name="_listener_", target=_listener_,
-        #                   args=(client,), daemon=True)
-        # Listener.start()
-        # Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
-        #                                 args=(client,), daemon=True)
-        # Detector_Client_thread.start()
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect((HOST, PORT))
+        print('>> Connect Server')
+        send_connect_msg(client)
+        Listener = Thread(name="_listener_", target=_listener_,
+                          args=(client,), daemon=True)
+        Listener.start()
+        Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
+                                        args=(client,), daemon=True)
+        Detector_Client_thread.start()
 
         while True:
             inputData = input('')
