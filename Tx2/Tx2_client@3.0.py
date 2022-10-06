@@ -124,7 +124,7 @@ def _detect_(client):
                 print(detectedData)
         except FileNotFoundError as e:
             # time.sleep(2)
-            print("\n아무것도 인식되지 않았습니다. 프로그램을 종료합니다. \n")
+            print("\n>> 아무것도 인식되지 않았습니다. Detecting을 종료합니다. \n")
             send_detector_data(client, status="initializing", classType="FINISHED",
                                    x="FINISHED", y="FINISHED")
         except Exception as e:
