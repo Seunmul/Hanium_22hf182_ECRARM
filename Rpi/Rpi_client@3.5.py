@@ -120,22 +120,22 @@ def _listener_(client):
 # arm control
 
 
-def _arm_control_(Arm, theta0, theta1, theta2, theta3, theta4, theta5):
+def _arm_control_(Arm, x_d, y_d, z_d, w_d, r_d, s_d):
     # 0. 제어 시간 체크
     start_time = time.time()
     print("현재 각도 : " + str(Arm.getCurDegree()))
     X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
-        "X", theta0, Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
+        "X", x_d, Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
     Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
-        "Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y,), daemon=True)
+        "Y", y_d, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y,), daemon=True)
     Z_axis = Thread(name="Z_axis", target=Arm._STEP_CONTROL_, args=(
-        "Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z,), daemon=True)
+        "Z", z_d, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z,), daemon=True)
     W_axis = Thread(name="W_axis", target=Arm._SERVO_CONTROL_, args=(
-        "W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,), daemon=True)
+        "W", w_d, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,), daemon=True)
     R_axis = Thread(name="R_axis", target=Arm._SERVO_CONTROL_, args=(
-        "R", theta4, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R,), daemon=True)
+        "R", r_d, Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R,), daemon=True)
     S_axis = Thread(name="S_axis", target=Arm._SERVO_CONTROL_, args=(
-        "S", theta5, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S,), daemon=True)
+        "S", s_d, Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S,), daemon=True)
 
     Axises = [X_axis, Y_axis, Z_axis, W_axis, R_axis, S_axis]
 
@@ -170,47 +170,83 @@ def _control_(client, Arm):
 
         # 작업 코드 추가하면됩니다....
         print("\n\n>> Controlling Arms .----")
-
-        print(">> 각도 제한 범위 : -180<x<180, 0<y<170, -30<z<90 , 0<w<180, 0<r<180 ")
+        
+        # print(">> 각도 제한 범위 : -180<x<180, 0<y<170, -30<z<90 , 0<w<180, 0<r<180 ")
 
         # 1. 디텍터로부터 수신 데이터 확인 및 데이터 처리(x,y좌표계로 소요 각도 계산)
+
+        # x 축 제어
+        x_d, y_d, z_d, w_d, r_d, s_d = 0, 0, 0, 0, 0, 0
+        x = float(receivedData['Detector']['data']['x'])*9
+        y = 8 - float(receivedData['Detector']['data']['x'])*16
+
+        R, x_d = CALCUL.changeCoordinate(y,x)
+        _arm_control_(Arm, x_d=x_d, y_d=0, z_d=0, w_d=0, r_d=0, s_d=0)
+
+        # 라이다로 거리 줄이는 코드
+        height = CALCUL.HEIGHT
+        while(1) :
+            time.sleep(0.1)
+            y_d, z_d, w_d = CALCUL.calculAngle(R, height)
+
+            y_d = y_d - Arm.degree.get('Y')
+            z_d = z_d - Arm.degree.get('Z')
+            w_d = w_d - Arm.degree.get('W')   
+            
+            _arm_control_(Arm, x_d=0, y_d=y_d, z_d=z_d, w_d=w_d, r_d=0, s_d=0)
+
+            if CALCUL.CHECK_DIS > CALCUL.detect_distance() : 
+                Arm.getElement()
+                break
+            else :
+                height = CALCUL.decreaseDis(height)
+
+        # 초기상태로 돌아감
+        y_d = 90 - Arm.degree.get('W')
+        _arm_control_(Arm, x_d=0, y_d=y_d, z_d=0, w_d=0, r_d=0, s_d=0)           
+        
+        # 분류통으로 이동
         print(f">> 디텍터 수신 데이터 : {receivedData['Detector']['data']}")
         if(int(receivedData['Detector']['data']['class']) == 0):
             print(">>IC CHIP")
-            x_d = 60
+            x_d = Arm.sort_buckets[0][0] - Arm.degree.get("X")
+            y_d = Arm.sort_buckets[0][1] - Arm.degree.get("Y")  
+            z_d = Arm.sort_buckets[0][2] - Arm.degree.get("Z")  
+            w_d = Arm.sort_buckets[0][3] - Arm.degree.get("W") 
         elif(int(receivedData['Detector']['data']['class']) == 1):
             print(">>LED")
-            x_d = 90
+            x_d = Arm.sort_buckets[1][0] - Arm.degree.get("X")
+            y_d = Arm.sort_buckets[1][1] - Arm.degree.get("Y")  
+            z_d = Arm.sort_buckets[1][2] - Arm.degree.get("Z")  
+            w_d = Arm.sort_buckets[1][3] - Arm.degree.get("W")
         elif(int(receivedData['Detector']['data']['class']) == 2):
             print(">>Capacitor")
-            x_d = 110
+            x_d = Arm.sort_buckets[2][0] - Arm.degree.get("X")
+            y_d = Arm.sort_buckets[2][1] - Arm.degree.get("Y")  
+            z_d = Arm.sort_buckets[2][2] - Arm.degree.get("Z")  
+            w_d = Arm.sort_buckets[2][3] - Arm.degree.get("W")
         elif(int(receivedData['Detector']['data']['class']) == 3):
             print(">>Resistor")
-            x_d = -60
+            x_d = Arm.sort_buckets[3][0] - Arm.degree.get("X")
+            y_d = Arm.sort_buckets[3][1] - Arm.degree.get("Y")  
+            z_d = Arm.sort_buckets[3][2] - Arm.degree.get("Z")  
+            w_d = Arm.sort_buckets[3][3] - Arm.degree.get("W")
         elif(int(receivedData['Detector']['data']['class']) == 4):
             print(">>Transistor")
-            x_d = -90
-        # test value
-        y_d = 50
-        z_d = 40
-        w_d = 0
+            x_d = Arm.sort_buckets[4][0] - Arm.degree.get("X")
+            y_d = Arm.sort_buckets[4][1] - Arm.degree.get("Y")  
+            z_d = Arm.sort_buckets[4][2] - Arm.degree.get("Z")  
+            w_d = Arm.sort_buckets[4][3] - Arm.degree.get("W")        # test value
 
-        # print(
-        #     f'>> 이동 각도 : "X": {x_d}, "Y": {y_d}, "Z": {z_d}, "W": {w_d}, "R": {r_d}')
-        # 2. 각도 계산 데이터를 활용하여 로봇팔 컨트롤 - __CONTROL__ THREAD : X ,Y, Z, W, R
-
-        # 2-1. => 로봇 팔 x,y,z축 제어 => 대략적 위치 조정
-        _arm_control_(Arm, theta0=x_d, theta1=y_d, theta2=z_d,
-                      theta3=w_d, theta4=0, theta5=0)
-        # 2-2. => 로봇 팔 w,r 축 및 그리퍼 제어 => 정밀한 위치 조정
-
-        # 우선은 테스트 데이터만 날림
+        _arm_control_(Arm, x_d=x_d, y_d=y_d, z_d=z_d, w_d=w_d, r_d=r_d, s_d=s_d)
+        
+        # 소자 놓기 및 초기상태
+        time.sleep(0.5)
+        Arm.releaseElement()
+        Arm._INIT_()
 
         print(">> Controlling finished")
-        # print(">> 제어 후  현재 각도 : %s" % (Arm.getCurDegree()))
-        # print(Arm.getCurDegree()["X"])
-        _arm_control_(Arm, theta0=-x_d, theta1=-y_d, theta2=-z_d,
-                      theta3=-w_d, theta4=0, theta5=0)
+        print(">> 제어 후  현재 각도 : %s" % (Arm.getCurDegree()))
 
         ##### 실행 중 stopping status 시 리턴,  나중에 curDegree값을 전송해주면 됨. #####
         if (receivedData["status"] == "stopping"):
@@ -283,6 +319,7 @@ if (__name__ == "__main__"):
         Arm._STEP_SETUP_()
         Arm._SERVO_SETUP_()
         Arm._INIT_()
+        Arm.setElectromagnetic()
         # 소켓 연결
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect((HOST, PORT))

@@ -23,7 +23,6 @@ def stepPinTimer(STEPPIN, GPIO_OUT, i):
 
 
 class Arm:
-
     # step control pins
     STEPPIN_X, DIRPIN_X, ENPIN_X = 5, 6, 13  # BOARD 29 31 33
     STEPPIN_Y, DIRPIN_Y, ENPIN_Y = 12, 16, 20  # BOARD 32 36 38
@@ -32,9 +31,11 @@ class Arm:
     STEP_MODE_PIN_Z = 17  # BOARD : 11
     STEP_VCC_PIN = 15  # BOARD : 10
 
+    ELCTROMAGNETIC = 18
+
     # step moter contorl params
     STEP_MODE = 16  # step motor mode
-    STEP_FREQ = 500  # step moter signal frequency
+    STEP_FREQ = 400  # step moter signal frequency
     PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X,
             STEPPIN_Y, DIRPIN_Y, ENPIN_Y,
             STEPPIN_Z, DIRPIN_Z, ENPIN_Z,
@@ -53,17 +54,32 @@ class Arm:
         PCA.frequency = 60  # Set the PWM frequency to 60hz.
 
         self.que = Queue()
-        self.degree = {"X": 0, "Y": 180, "Z": -30, "W": 10, "R": 0, "S": 0}
-        self.init_degree = {"X": 0, "Y": 180,
-                            "Z": -30, "W": 10, "R": 0, "S": 0}
-        self.sort_buckets = [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [
-            0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]
+        self.degree = {"X": 0, "Y": 174, "Z": -58, "W": 15, "R": 0, "S": 0}
+        self.init_degree = {"X": 0, "Y": 174,
+                            "Z": -58, "W": 15, "R": 0, "S": 0}
+        self.sort_buckets = [[90, 50, 40, 0, 0], [65, 50, 40, 0, 0], [
+            110, 50, 40, 0, 0], [-65, 50, 40, 0, 0], [-90, 50, 40, 0, 0]]
         self.PCA = PCA
 
         # GPIO PIN number에 맞게 셋업 : GPIO.OUT / GPIO.IN
         # for PIN in PINS:
         #     GPIO.setup(PIN, GPIO.OUT, initial=GPIO.LOW)
         return
+
+    #--------------------Electro magnetic-------------------
+    def setElectromagnetic(self) :
+        GPIO.setup(Arm.ELCTROMAGNETIC, GPIO.OUT, initial=GPIO.HIGH)
+        return
+
+    def getElement(self) :
+        GPIO.output(Arm.ELCTROMAGNETIC,GPIO.LOW)
+        return
+
+    def releaseElement(self) :
+        GPIO.output(Arm.ELCTROMAGNETIC,GPIO.HIGH)
+        return
+
+    #---------------------------------------------------------------    
 
     def getCurDegree(self):
         # print(self.degree)
@@ -77,22 +93,52 @@ class Arm:
             self.degree.update(self.que.get())
         return
 
+    ## init 쓰레드 쓰지 말기
     def _INIT_(self):  # 무슨 각도에 있든지 초기 상태로 돌리는 함수
-        self._SERVO_CONTROL_("S", (self.init_degree.get(
-            'S')-self.degree.get('S')), Arm.PCA_CHANNEL_S, Arm.MIN_PWM_S, Arm.INTERVAL_S)
-        self._SERVO_CONTROL_("R", (self.init_degree.get(
-            'R')-self.degree.get('R')), Arm.PCA_CHANNEL_R, Arm.MIN_PWM_R, Arm.INTERVAL_R)
-        self._SERVO_CONTROL_("W", (self.init_degree.get(
-            'W')-self.degree.get('W')), Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W)
-        self._STEP_CONTROL_("Z", (self.init_degree.get(
-            'Z')-self.degree.get('Z')), Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z)
-        self._STEP_CONTROL_("Y", (self.init_degree.get(
-            'Y')-self.degree.get('Y')), Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y)
-        self._STEP_CONTROL_("X", (self.init_degree.get(
-            'X')-self.degree.get('X')), Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X)
+        theta0, theta1, theta2, theta3  = (self.init_degree.get('X')-self.degree.get('X')), \
+             (self.init_degree.get('Y')-self.degree.get('Y')), \
+                (self.init_degree.get('Z')-self.degree.get('Z')), \
+                    (self.init_degree.get('W')-self.degree.get('W'))
+
+        print(str(theta0) + " " + str(theta1) + " " + str(theta2) + " " + str(theta3))
+        X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
+            self,"X", theta0 , Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
+        Y_axis = Thread(name="Y_axis", target=Arm._STEP_CONTROL_, args=(
+            self,"Y", theta1, Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y,), daemon=True)
+        Z_axis = Thread(name="Z_axis", target=Arm._STEP_CONTROL_, args=(
+            self,"Z", theta2, Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z,), daemon=True)
+        W_axis = Thread(name="W_axis", target=Arm._SERVO_CONTROL_, args=(
+            self,"W", theta3, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,), daemon=True) 
+        Axises = [X_axis, Y_axis, Z_axis, W_axis] 
+
+        for axis in Axises :
+            axis.start()
+        for axis in Axises :
+            axis.join()   
+            
         print("initializing complete! ")
         self.updateCurDegree()
         return
+
+    def _FIN_(self):  # 무슨 각도에 있든지 초기 상태로 돌리는 함수
+        self._STEP_CONTROL_("Y", (90-self.degree.get('Y')), Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y)
+        self._STEP_CONTROL_("Z", (90-self.degree.get('Z')), Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z)
+        self._SERVO_CONTROL_("W", (90-self.degree.get('W')), Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W)
+        self._STEP_CONTROL_("X", (180-self.degree.get('X')), Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X)
+
+        self.updateCurDegree()
+
+        self._STEP_CONTROL_("Z", (self.init_degree.get(
+            'Z')-self.degree.get('Z')), Arm.STEPPIN_Z, Arm.DIRPIN_Z, Arm.ENPIN_Z)    
+        self._STEP_CONTROL_("Y", (self.init_degree.get(
+            'Y')-self.degree.get('Y')), Arm.STEPPIN_Y, Arm.DIRPIN_Y, Arm.ENPIN_Y)             
+        self._SERVO_CONTROL_("W", (self.init_degree.get(
+            'W')-self.degree.get('W')), Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W)
+        self._STEP_CONTROL_("X", (self.init_degree.get('X')-self.degree.get('X')), Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X)    
+
+        print("complete! ")
+        self.updateCurDegree()
+        return     
 
     # -180<x<180, 0<y<180, -30<z<90 , 0<w<180, 0<r<180
     def checkAngle(self, degree, AXIS):
@@ -102,12 +148,12 @@ class Arm:
         if AXIS == 'X' and (angle < -180 or angle > 180):
             # 360 up re
             return (-180 - pre_degree) if angle < -180 else (180 - pre_degree)
-        elif AXIS == 'Y' and (angle < 0 or angle > 180):
-            return (0 - pre_degree) if angle < 0 else (180 - pre_degree)
-        elif AXIS == 'Z' and (angle < -30 or angle > 90):
-            return (-30 - pre_degree) if angle < -30 else (90 - pre_degree)
-        elif AXIS == 'W' and (angle < 0 or angle > 180):
-            return (0 - pre_degree) if angle < 0 else (180 - pre_degree)
+        elif AXIS == 'Y' and (angle < 0 or angle > 174):
+            return (0 - pre_degree) if angle < 0 else (174 - pre_degree)
+        elif AXIS == 'Z' and (angle < -58 or angle > 90):
+            return (-58 - pre_degree) if angle < -58 else (90 - pre_degree)
+        elif AXIS == 'W' and (angle < 0 or angle > 90):
+            return (0 - pre_degree) if angle < 0 else (90 - pre_degree)
         elif AXIS == 'R' and (angle < 0 or angle > 180):
             return (0 - pre_degree) if angle < 0 else (180 - pre_degree)
         elif AXIS == 'S' and (angle < 0 or angle > 180):
@@ -157,7 +203,7 @@ class Arm:
         elif AXIS == 'Y':
             steps = steps * 6
         elif AXIS == 'Z':
-            steps = steps * 4.5
+            steps = steps * 4.6
 
         # 오차 방지를 위해 정수로 반올림
         return steps, dir
@@ -168,7 +214,7 @@ class Arm:
             degree, AXIS)  # target degree가 크면 시계방향으로 회전
 
         if (AXIS == 'X'):
-            STEP_PULSE_LEVEL_TIME = float(self.STEP_PULSE_LEVEL_TIME) / 4
+            STEP_PULSE_LEVEL_TIME = float(self.STEP_PULSE_LEVEL_TIME) / 2
         else:
             STEP_PULSE_LEVEL_TIME = self.STEP_PULSE_LEVEL_TIME
 
@@ -200,12 +246,13 @@ class Arm:
     # SERVO---------------------------------------------------------
 
     def _DEGREE_TO_PWM_(self, interval, min_pwm, degree):
-        pwm = min_pwm + (interval*180) if degree > 180 else min_pwm + \
+        pwm = min_pwm + (interval*90) if degree > 90 else min_pwm + \
             (interval*degree)
         return pwm
 
-    def _SERVO_SETUP_(self, MIN=0x07f5, MAX=0x1b6f):
-        degree_per_interval = round(float(MAX-MIN)/180, 1)
+        # MIN=0x07f5, MAX=0x1b6f
+    def _SERVO_SETUP_(self, MIN=0x0f60, MAX=0x1b6f):
+        degree_per_interval = round(float(MAX-MIN)/90, 1)
         # print("%f %d %d\n" % (degree_per_interval, MIN, MAX))
         Arm.INTERVAL_W, Arm.INTERVAL_R, Arm.INTERVAL_S = degree_per_interval, degree_per_interval, degree_per_interval
         Arm.MIN_PWM_W, Arm.MIN_PWM_R,  Arm.MIN_PWM_S = MIN, MIN, MIN
@@ -226,14 +273,12 @@ class Arm:
                     interval if((cur_pwm + interval) < pwm) else pwm
                 self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
                 time.sleep(0.005)
-                print("%d \n", cur_pwm)
         elif(cur_pwm > pwm):
             while cur_pwm > pwm:
                 cur_pwm = cur_pwm - \
                     interval if((cur_pwm-interval) > pwm) else pwm
                 self.PCA.channels[channel_num].duty_cycle = int(cur_pwm)
                 time.sleep(0.005)
-                print("%d \n", cur_pwm)
 
         print("check pwm : %d" % (pwm))
         print("CONTROL %s : END" % (AXIS))
