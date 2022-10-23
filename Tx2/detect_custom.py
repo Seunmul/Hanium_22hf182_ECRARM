@@ -37,8 +37,8 @@ def load_model(save_img=False):
 
     if half:
         model.half()  # to FP16
-
-   
+	
+    save_img=False
     return device,imgsz,stride,model,half,save_txt,save_img,view_img
 
 

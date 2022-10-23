@@ -252,7 +252,7 @@ def Load_Camera(index:int):
 if (__name__ == "__main__"):
     try:
         # 카메라 인덱스
-        camera_index = 0
+        camera_index = 1
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
                           args=(camera_index,), daemon=True)
@@ -289,7 +289,7 @@ if (__name__ == "__main__"):
                 dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
 
                 # 모델 인퍼런스 실행.
-                # source="images/bus.jpg"
+               # source="images/bus.jpg"
                 source="images/img_captured.jpg"
                 with dc.torch.no_grad():
                     save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
