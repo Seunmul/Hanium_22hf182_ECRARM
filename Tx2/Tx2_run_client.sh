@@ -10,6 +10,6 @@ if [ ! -d ./yolov7 ]; then
 fi
 
 echo $WORK_HOME
-cp detect_custom.py yolov7/
-python3 Tx2_client@3.1.py
+# cp detect_custom_inf.py yolov7/detect_custom.py
+python3 Tx2_client_inf.py
 #실행 안되면 python3 명령어로(리눅스,맥 등..)
