@@ -5,6 +5,7 @@ import socket
 import time
 import sys
 import os
+import numpy as np
 from PIL import Image
 
 print(">> LOADING ML DETECITON MODEL ")
@@ -101,11 +102,13 @@ def _detect_(client):
         try :
         
             #FRAME 전역변수로부터 이미지 소스 캡쳐
-            dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
+            #dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
 
             # 모델 인퍼런스 실행.
             # source="images/bus.jpg"
-            source="images/img_captured.jpg"
+            #source="images/img_captured.jpg"
+            source = FRAME
+            source = np.expand_dims(source, dim=0)
             with dc.torch.no_grad():
                 save_dir,save_path,txt_path = dc.detect_run(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
             print(txt_path,end="\n")
@@ -253,38 +256,55 @@ def Load_Camera(index:int):
 if (__name__ == "__main__"):
     try:
         # 카메라 인덱스
-        camera_index = 0
+        camera_index = 1
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
                           args=(camera_index,), daemon=True)
         camera_listener.start()
 
         ## 클라이언트 소켓 생성
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client.connect((HOST, PORT))
-        print('>> Connect Server')
-        send_connect_msg(client)
-        Listener = Thread(name="_listener_", target=_listener_,
-                          args=(client,), daemon=True)
-        Listener.start()
-        Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
-                                        args=(client,), daemon=True)
-        Detector_Client_thread.start()
+        # client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # client.connect((HOST, PORT))
+        # print('>> Connect Server')
+        # send_connect_msg(client)
+        # Listener = Thread(name="_listener_", target=_listener_,
+        #                   args=(client,), daemon=True)
+        # Listener.start()
+        # Detector_Client_thread = Thread(name="Detector_Client", target=Detector_Client,
+        #                                 args=(client,), daemon=True)
+        # Detector_Client_thread.start()
 
         while True:
+            time.sleep(0.1)
             inputData = input('')
             if inputData == 'quit':
                 print("exit client")
                 break
-            elif inputData == 'clear':
-                send_detector_data(client, status=receivedData["status"], classType="none",
-                                   x=0, y=0)
-            elif inputData == 'td':
-                send_detector_data(client, status=receivedData["status"], classType="resistor",
-                                   x=60, y=60)
+            # elif inputData == 'clear':
+            #     send_detector_data(client, status=receivedData["status"], classType="none",
+            #                        x=0, y=0)
+            # elif inputData == 'td':
+            #     send_detector_data(client, status=receivedData["status"], classType="resistor",
+            #                        x=60, y=60)
             elif inputData =='y':
-                print("캡쳐")
-                dc.cv2.imwrite('images/img_captured_test.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
+                # print("캡쳐")
+                # dc.cv2.imwrite('images/img_captured_test.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
+                            #FRAME 전역변수로부터 이미지 소스 캡쳐
+                #dc.cv2.imwrite('images/img_captured.jpg', FRAME, params=[dc.cv2.IMWRITE_JPEG_QUALITY,100])
+
+                # 모델 인퍼런스 실행.
+               # source="images/bus.jpg"
+                #source="images/img_captured.jpg"
+                source = FRAME
+                source = np.expand_dims(source, axis=0)
+                with dc.torch.no_grad():
+                    save_dir,save_path,txt_path = dc.detect_run2(dc.device,dc.imgsz,dc.stride,dc.model,dc.half,dc.save_txt,dc.save_img,dc.view_img,source)
+                print(txt_path,end="\n")
+
+                #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
+                print("show deteted image")
+                # img = Image.open(save_path)
+                # img.show()
 
 
     except KeyboardInterrupt as e:

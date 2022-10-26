@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import Navigation from "./components/nav/Navigation";
-import SideBar from "./components/sidebar/SideBar";
-import Divider from "./components/divider/Divider";
-import DividerVertical from "./components/divider/Divider-vertical";
-import Footer from "./components/footer/Footer";
-import Main from "./components/main/Main";
-import { IconContext, icons } from "./components/icon/icon-context";
+import Navigation from "components/UI/nav/Navigation";
+import SideBar from "components/UI/sidebar/SideBar";
+import Divider from "components/UI/divider/Divider";
+import DividerVertical from "components/UI/divider/Divider-vertical";
+import Footer from "components/UI/footer/Footer";
+import Main from "pages/main/Main"
+import { IconContext, icons } from "components/UI/icon/icon-context";
 
 import "./App.css";
 

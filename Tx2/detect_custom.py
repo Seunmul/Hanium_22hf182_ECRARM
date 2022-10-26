@@ -1,14 +1,15 @@
+#-*- coding: utf-8 -*-
 import argparse
 import time
 from pathlib import Path
 
 import cv2
+import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
-
 from models.experimental import attempt_load
-from utils.datasets import LoadStreams, LoadImages
+from utils.datasets import LoadStreams, LoadImages,letterbox
 from utils.general import check_img_size, check_requirements, check_imshow, non_max_suppression, apply_classifier, \
     scale_coords, xyxy2xywh, strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box
@@ -32,11 +33,13 @@ def load_model(save_img=False):
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
 
-    if trace:
-        model = TracedModel(model, device, opt.img_size)
+    # if trace:
+    #     model = TracedModel(model, device, opt.img_size)
 
     if half:
+        print("FP16")
         model.half()  # to FP16
+<<<<<<< HEAD
 	
     save_img=False
     return device,imgsz,stride,model,half,save_txt,save_img,view_img
@@ -47,6 +50,27 @@ def detect_run2(device,imgsz,stride,model,half,save_txt,save_img,view_img,source
     (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
     
     print(type(source), source)
+=======
+
+    return device,imgsz,stride,model,half,save_txt,save_img,view_img
+
+
+def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source):
+    # save_img = not opt.nosave and not source.endswith('.txt')  # save inference images
+    # webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
+        # ('rtsp://', 'rtmp://', 'http://', 'https://'))
+
+    # Padded resize
+    img = letterbox(source, imgsz, stride=stride)[0]
+
+    # Convert
+    img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+    img = np.ascontiguousarray(img)
+    
+    # Directories
+    save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
+    (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
 
     # Get names and colors
     names = model.module.names if hasattr(model, 'module') else model.names
@@ -59,18 +83,34 @@ def detect_run2(device,imgsz,stride,model,half,save_txt,save_img,view_img,source
     old_img_b = 1
 
     t0 = time.time()
+<<<<<<< HEAD
     
     img  = source 
+=======
+    # for path, img, in dataset:
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
     img = torch.from_numpy(img).to(device)
     img = img.half() if half else img.float()  # uint8 to fp16/32
     img /= 255.0  # 0 - 255 to 0.0 - 1.0
     if img.ndimension() == 3:
         img = img.unsqueeze(0)
 
+<<<<<<< HEAD
+=======
+    # Warmup
+    if device.type != 'cpu' and (old_img_b != img.shape[0] or old_img_h != img.shape[2] or old_img_w != img.shape[3]):
+        old_img_b = img.shape[0]
+        old_img_h = img.shape[2]
+        old_img_w = img.shape[3]
+        for i in range(3):
+            model(img, augment=opt.augment)[0]
+
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
     # Inference
     t1 = time_synchronized()
     pred = model(img, augment=opt.augment)[0]
     t2 = time_synchronized()
+<<<<<<< HEAD
 
     # Apply NMS
     pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
@@ -90,6 +130,23 @@ def detect_run2(device,imgsz,stride,model,half,save_txt,save_img,view_img,source
         if len(det):
             # Rescale boxes from img_size to im0 size
             det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+=======
+    
+    # Apply NMS
+    pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
+    t3 = time_synchronized()
+    s=""
+
+    # Process detections
+    for i, det in enumerate(pred):  # detections per image
+            #p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
+        save_path = str(save_dir / "img.jpg")  # img.jpg
+        txt_path = str(save_dir / 'labels' / "img.txt")  # img.txt
+        gn = torch.tensor(source.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+        if len(det):
+            # Rescale boxes from img_size to im0 size
+            det[:, :4] = scale_coords(img.shape[2:], det[:, :4], source.shape).round()
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
 
             # Print results
             for c in det[:, -1].unique():
@@ -107,14 +164,21 @@ def detect_run2(device,imgsz,stride,model,half,save_txt,save_img,view_img,source
                     line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
                     with open(txt_path + '.txt', 'a') as f:
                         f.write(('%g ' * len(line)).rstrip() % line + '\n')
+<<<<<<< HEAD
 
                 if save_img or view_img:  # Add bbox to image
                     label = f'{names[int(cls)]} {conf:.2f}'
                     plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=1)
+=======
+                if save_img or view_img:  # Add bbox to image
+                    label = f'{names[int(cls)]} {conf:.2f}'
+                    plot_one_box(xyxy, source, label=label, color=colors[int(cls)], line_thickness=1)
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
 
         # Print time (inference + NMS)
         print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
+<<<<<<< HEAD
         # Stream results
         if view_img:
             cv2.imshow(str(p), im0)
@@ -139,10 +203,16 @@ def detect_run2(device,imgsz,stride,model,half,save_txt,save_img,view_img,source
                         save_path += '.mp4'
                     vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
                 vid_writer.write(im0)
+=======
+        # Save results (image with detections)
+        if save_img:
+            cv2.imwrite(save_path, source)
+            print(f" The image with the result is saved in: {save_path}")
+>>>>>>> ef08d4d2a1668522679f4774de726ff5e1fdad5b
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        #print(f"Results saved to {save_dir}{s}")
+        print(f"Results saved to {save_dir}{s}")
 
     print(f'Done. ({time.time() - t0:.3f}s)')
     return save_dir,save_path,txt_path
@@ -174,9 +244,10 @@ if __name__=="detect_custom":
     opt.save_txt=True
     opt.save_conf=True
     opt.name='elements'
+
     print(opt)
 
     with torch.no_grad():
-       device,imgsz,stride,model,half,save_txt,save_img,view_img=load_model()
+       device,imgsz,stride,model,half,save_txt,save_img,view_img=load_model(save_img=False)
                 
 
