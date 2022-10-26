@@ -39,6 +39,7 @@ ECRARM_PY_ENV/lib
 ECRARM_PY_ENV/lib64
 
 
+*.env
 Tx2/runs/detect
 *img_captured.jpg*
 *Pipfile*

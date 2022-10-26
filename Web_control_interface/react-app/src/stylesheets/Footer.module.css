@@ -1,0 +1,34 @@
+.footer-verti-layout {
+  display: flex;
+  flex-direction: column;
+  height: 20%;
+  width: 100%;
+  padding: 15px;
+}
+
+.footer-layer1 {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  align-items: center;
+  border-top: thin solid lightgray;
+  padding: 30px;
+}
+.footer-layer1-icons {
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: flex-end;
+  align-content: flex-end;
+  color:gray;
+  padding-top: 16px;
+  padding: 16px;
+}
+.footer-layer1-used {
+  display: flex;
+  flex-flow: column wrap;
+  font-size: 8px;
+}
+.footer-icon-size {
+  font-size: 30px;
+  padding-right: 16px;
+}
