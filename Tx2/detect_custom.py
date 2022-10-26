@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 import argparse
 import time
 from pathlib import Path
@@ -32,13 +33,13 @@ def load_model(save_img=False):
     stride = int(model.stride.max())  # model stride
     imgsz = check_img_size(imgsz, s=stride)  # check img_size
 
-    if trace:
-        model = TracedModel(model, device, opt.img_size)
+    # if trace:
+    #     model = TracedModel(model, device, opt.img_size)
 
     if half:
+        print("FP16")
         model.half()  # to FP16
 
-   
     return device,imgsz,stride,model,half,save_txt,save_img,view_img
 
 
@@ -47,10 +48,9 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
     # webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         # ('rtsp://', 'rtmp://', 'http://', 'https://'))
 
-    save_img = True
-    
     # Padded resize
     img = letterbox(source, imgsz, stride=stride)[0]
+
     # Convert
     img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
     img = np.ascontiguousarray(img)
@@ -76,6 +76,7 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
     img /= 255.0  # 0 - 255 to 0.0 - 1.0
     if img.ndimension() == 3:
         img = img.unsqueeze(0)
+
     # Warmup
     if device.type != 'cpu' and (old_img_b != img.shape[0] or old_img_h != img.shape[2] or old_img_w != img.shape[3]):
         old_img_b = img.shape[0]
@@ -92,8 +93,8 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
     # Apply NMS
     pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
     t3 = time_synchronized()
-
     s=""
+
     # Process detections
     for i, det in enumerate(pred):  # detections per image
             #p, s, im0, frame = path, '', im0s, getattr(dataset, 'frame', 0)
@@ -128,9 +129,9 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
         print(f'{s}Done. ({(1E3 * (t2 - t1)):.1f}ms) Inference, ({(1E3 * (t3 - t2)):.1f}ms) NMS')
 
         # Save results (image with detections)
-        # if save_img:
-        #     cv2.imwrite(save_path, source)
-        #     print(f" The image with the result is saved in: {save_path}")
+        if save_img:
+            cv2.imwrite(save_path, source)
+            print(f" The image with the result is saved in: {save_path}")
 
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
@@ -166,9 +167,10 @@ if __name__=="detect_custom":
     opt.save_txt=True
     opt.save_conf=True
     opt.name='elements'
+
     print(opt)
 
     with torch.no_grad():
-       device,imgsz,stride,model,half,save_txt,save_img,view_img=load_model()
+       device,imgsz,stride,model,half,save_txt,save_img,view_img=load_model(save_img=False)
                 
 

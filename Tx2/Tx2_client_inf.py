@@ -1,10 +1,11 @@
-
+#-*- coding: utf-8 -*-
 import json
 from threading import Thread
 import socket
 import time
 import sys
 import os
+
 # 시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME
 print(">> LOADING ML DETECITON MODEL ")
 sys.path.append(os.environ["WORK_HOME"])
@@ -40,17 +41,10 @@ def Load_Camera(index: int):
     print(">> 카메라 로드 완료.")
 
     while True:
-        # read : 프레임 읽기
-        # 1) 읽은 결과(True / False)
-        # 2) 읽은 프레임
         retval, FRAME = capture.read()
-        
         # 읽은 프레임이 없는 경우 종료
         if not retval:
             break
-
-        # 프레임 출력
-        # dc.cv2.imshow("resize_frame", FRAME)
 
     # 카메라 메모리 연결 해제
     capture.release()
@@ -68,7 +62,6 @@ if (__name__ == "__main__"):
         camera_listener.start()
 
         while True:
-            time.sleep(0.1)
             inputData = input('y or quit : ')
 
             if inputData == 'quit':
@@ -84,7 +77,7 @@ if (__name__ == "__main__"):
                 #                params=[dc.cv2.IMWRITE_JPEG_QUALITY, 100])
 
                 # 모델 인퍼런스 실행.
-                source="images/bus.jpg"
+                # source="images/bus.jpg"
                 with dc.torch.no_grad():
                     save_dir, save_path, txt_path = dc.detect_run(
                         dc.device, dc.imgsz, dc.stride, dc.model, dc.half, dc.save_txt, dc.save_img, dc.view_img, FRAME)
