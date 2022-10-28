@@ -11,7 +11,7 @@ print(">> LOADING ML DETECITON MODEL ")
 sys.path.append(os.environ["WORK_HOME"])
 import detect_custom as dc
 
-# FRAME 전역변수 선언
+# 전역변수 선언
 global FRAME, capture
 
 # 카메라 로드 -> FRAME 전역변수에 계속 저장.
@@ -54,7 +54,7 @@ def Load_Camera(index: int):
 if (__name__ == "__main__"):
     try:
         # 카메라 인덱스
-        camera_index = 1
+        camera_index = 0
         # 카메라 연결
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
                                  args=(camera_index,), daemon=True)
@@ -69,7 +69,7 @@ if (__name__ == "__main__"):
 
             elif inputData == 'y':
                 # 모델 인퍼런스 실행.
-                print(f"get img data from mem : {type(FRAME)}",end="\n\n")
+                print(f" >> get img data from mem : {type(FRAME)}",end="\n\n")
                 with dc.torch.no_grad():
                     save_dir, save_path, txt_path = dc.detect_run(
                         dc.device, dc.imgsz, dc.stride, dc.model, dc.half, dc.save_txt, dc.save_img, dc.view_img, FRAME)

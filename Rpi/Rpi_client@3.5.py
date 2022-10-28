@@ -16,8 +16,8 @@ from threading import Thread
 # 4: transistor
 
 
-HOST = '155.230.25.98'
-# HOST = '127.0.0.1'
+# HOST = '155.230.25.98'
+HOST = '127.0.0.1'
 PORT = 9999
 
 # receivedData 전역변수 선언
@@ -54,8 +54,6 @@ Arm = Arm()
 CALCUL = CALCUL()
 
 # connect 메시지 전송 및 이니셜라이즈
-
-
 def send_connect_msg(client):
     sendingData = json.dumps({
         "status": "connecting",
@@ -68,8 +66,6 @@ def send_connect_msg(client):
     return
 
 # controller의 데이터를 서버로 전송
-
-
 def send_controller_data(client, status: str, X: str, Y: str, Z: str, W: str, R: str):
     sendingData = json.dumps({
         "status": status,
@@ -89,8 +85,6 @@ def send_controller_data(client, status: str, X: str, Y: str, Z: str, W: str, R:
     return
 
 # 서버 메세지 리스너
-
-
 def _listener_(client):
     # receivedData 전역변수 사용
     global receivedData
@@ -115,12 +109,9 @@ def _listener_(client):
             print(e)
             print("잘못된 정보를 수신하였습니다.")
 
-# 준비상태
 
 # arm control
-
-
-def _arm_control_(Arm, x_d, y_d, z_d, w_d, r_d, s_d):
+def _arm_control_(client,Arm, x_d, y_d, z_d, w_d, r_d, s_d):
     # 0. 제어 시간 체크
     start_time = time.time()
     print("현재 각도 : " + str(Arm.getCurDegree()))
@@ -151,22 +142,28 @@ def _arm_control_(Arm, x_d, y_d, z_d, w_d, r_d, s_d):
     print(f">> {time.time() - start_time} seconds")
     print(f">> 현재 각도 : {Arm.getCurDegree()}")
     Arm.updateCurDegree()
+
+    # 서버로 현재각도 전송.
+    send_controller_data(client, status="controlling",
+                                X=str(Arm.getCurDegree()["X"]),
+                                Y=str(Arm.getCurDegree()["Y"]),
+                                Z=str(Arm.getCurDegree()["Z"]),
+                                W=str(Arm.getCurDegree()["W"]),
+                                R=str(Arm.getCurDegree()["R"]))
     return
 
 # 컨트롤
-
-
 def _control_(client, Arm):
     # receivedData 전역변수 사용
     global receivedData
     if (receivedData["status"] == "detecting_finished"):
-        # 0. 현재 control status 서버에 알리기
+        # 현재 control status 서버에 알리기
         send_controller_data(client, status="controlling",
-                             X=receivedData["Controller"]["data"]["X_Axis"],
-                             Y=receivedData["Controller"]["data"]["Y_Axis"],
-                             Z=receivedData["Controller"]["data"]["Z_Axis"],
-                             W=receivedData["Controller"]["data"]["W_Axis"],
-                             R=receivedData["Controller"]["data"]["R_Axis"])
+                                 X=str(Arm.getCurDegree()["X"]),
+                                 Y=str(Arm.getCurDegree()["Y"]),
+                                 Z=str(Arm.getCurDegree()["Z"]),
+                                 W=str(Arm.getCurDegree()["W"]),
+                                 R=str(Arm.getCurDegree()["R"]))
 
         # 작업 코드 추가하면됩니다....
         print("\n\n>> Controlling Arms .----")
@@ -174,7 +171,6 @@ def _control_(client, Arm):
         # print(">> 각도 제한 범위 : -180<x<180, 0<y<170, -30<z<90 , 0<w<180, 0<r<180 ")
 
         # 1. 디텍터로부터 수신 데이터 확인 및 데이터 처리(x,y좌표계로 소요 각도 계산)
-
         # x 축 제어
         x_d, y_d, z_d, w_d, r_d, s_d = 0, 0, 0, 0, 0, 0
         x = float(receivedData['Detector']['data']['x'])*9
@@ -188,7 +184,6 @@ def _control_(client, Arm):
         while(1) :
             time.sleep(0.1)
             y_d, z_d, w_d = CALCUL.calculAngle(R, height)
-
             y_d = y_d - Arm.degree.get('Y')
             z_d = z_d - Arm.degree.get('Z')
             w_d = w_d - Arm.degree.get('W')   
@@ -201,7 +196,7 @@ def _control_(client, Arm):
             else :
                 height = CALCUL.decreaseDis(height)
 
-        # 초기상태로 돌아감
+        # y축만 초기상태로
         y_d = 90 - Arm.degree.get('W')
         _arm_control_(Arm, x_d=0, y_d=y_d, z_d=0, w_d=0, r_d=0, s_d=0)           
         
@@ -282,14 +277,10 @@ def _control_(client, Arm):
 def Controller_Client(client, Arm):
     # receivedData 전역변수 사용
     global receivedData
-    global isControlling
 
     # 컨트롤링 상태 지역변수 선언(컨트롤 중에는 true 상태 유지!)
     isControlling = bool(True)
-    # 준비상태로 가기 : 0 , -60, 0, 70 ,0, 0
-    # _arm_control_(Arm, 0, -60, 40, 60, 0, 0)
 
-    isControlling = bool(False)
     # 초기 상태 전송
     send_controller_data(client, status="initializing",
                          X=str(Arm.getCurDegree()["X"]),
@@ -302,12 +293,12 @@ def Controller_Client(client, Arm):
     while True:
         time.sleep(0.1)
         if (not isControlling):
-            isControlling = True
+            isControlling = bool(True)
             startingControl = Thread(name="_control_", target=_control_,
                                      args=(client, Arm,), daemon=True)
             startingControl.start()
             startingControl.join()
-            isControlling = False
+            isControlling = bool(False)
 
 
 if (__name__ == "__main__"):

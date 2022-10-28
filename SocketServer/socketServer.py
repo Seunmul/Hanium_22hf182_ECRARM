@@ -5,7 +5,6 @@ from dataformat import *
 
 clientList = []  # 서버에 접속한 클라이언트 목록
 
-
 # 쓰레드에서 실행되는 코드입니다.
 # 접속한 클라이언트마다 새로운 쓰레드가 생성되어 통신을 하게 됩니다.
 def socket_thread(client, addr):
@@ -75,8 +74,8 @@ def _command_():
 
 
 # 서버 IP 및 열어줄 포트
-HOST = '155.230.25.98'
-# HOST = '127.0.0.1'
+# HOST = '155.230.25.98'
+HOST = '127.0.0.1'
 PORT = 9999
 
 if (__name__ == "__main__"):

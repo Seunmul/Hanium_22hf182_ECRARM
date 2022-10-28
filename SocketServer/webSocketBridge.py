@@ -2,12 +2,12 @@ import websockets
 import asyncio
 import json
 
-# SOCKET_HOST = '127.0.0.1'
-SOCKET_HOST = '155.230.25.98'
+SOCKET_HOST = '127.0.0.1'
+# SOCKET_HOST = '155.230.25.98'
 SOCKET_PORT = 9999
 
-# WEBSOCKET_HOST = '127.0.0.1'
-WEBSOCKET_HOST = '155.230.25.98'
+WEBSOCKET_HOST = '127.0.0.1'
+# WEBSOCKET_HOST = '155.230.25.98'
 WEBSOCKET_PORT = 8888
 
 WEB_CLIENTS = []  # 서버에 접속한 클라이언트 목록
@@ -149,7 +149,6 @@ async def handler(websocket):
         WEB_CLIENTS.remove(websocket.remote_address)
         print(f'>> Disconnected, IP : {str(websocket.remote_address)}')
         print(f'>> Current WEB_CLIENTS : {len(WEB_CLIENTS)}\n')
-
 
 async def main():
     # 웹소켓 서버 이용자가 요청을 보내면 handler가 인식합니다.

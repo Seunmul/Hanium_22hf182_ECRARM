@@ -62,6 +62,7 @@ def warm_up(device,imgsz,stride,model,half,source):
 
 def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source):
 
+    t0 = time.time()
     # Padded resize
     img = letterbox(source, imgsz, stride=stride)[0]
 
@@ -77,7 +78,6 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
     names = model.module.names if hasattr(model, 'module') else model.names
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
-    t0 = time.time()
     # for path, img, in dataset:
     img = torch.from_numpy(img).to(device)
     img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -110,7 +110,6 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
             for c in det[:, -1].unique():
                 n = (det[:, -1] == c).sum()  # detections per class
                 s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
-
 
             # Write results
             if save_txt :
