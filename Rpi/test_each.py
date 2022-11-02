@@ -1,6 +1,6 @@
 from __control__ import Arm
 from __calculation__ import CALCUL
-# from __control__ import GPIO
+from __control__ import GPIO
 # Import python Internal library
 from threading import Thread
 import RPi.GPIO as GPIO
@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     Arm._STEP_SETUP_()
     Arm._SERVO_SETUP_() 
-    Arm._INIT_()
+    Arm._INIT_(1)
     Arm.setElectromagnetic()
 
     try:
@@ -32,8 +32,13 @@ if __name__ == "__main__":
 
             ##-------------------------------------각도 직접 입력 -------------------------------------------------------------
             print("각도 제한 범위 : -180<theta0<180, 0<theta1<174, -58<theta2<90 , 0<theta3<90, 0<theta4<180, 0<theta5<180 ")
-            print("현재 각도 : " + str(Arm.getCurDegree()))
+            print("현재 각도 : " + str(Arm.getCurDegree())) 
             theta0, theta1, theta2, theta3  = map(int, input("관절 이동각도 입력 (x, y, z, w) : ").split())
+
+            # theta0 = theta0 - Arm.degree.get("X")
+            # theta1 = theta1 - Arm.degree.get("Y")
+            # theta2 = theta2 - Arm.degree.get("Z")
+            # theta3 = theta3 - Arm.degree.get("W") 
 
             X_axis = Thread(name="X_axis", target=Arm._STEP_CONTROL_, args=(
                 "X", theta0 , Arm.STEPPIN_X, Arm.DIRPIN_X, Arm.ENPIN_X,), daemon=True)
@@ -49,8 +54,9 @@ if __name__ == "__main__":
             Axises[0].join()
 
             Axises[1].start()
-            Axises[2].start()
             Axises[1].join()
+
+            Axises[2].start()
             Axises[2].join()
 
             Axises[3].start()

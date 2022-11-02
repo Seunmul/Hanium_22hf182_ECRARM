@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     Arm._STEP_SETUP_()
     Arm._SERVO_SETUP_() 
-    Arm._INIT_()
+    Arm._INIT_(1)
     Arm.setElectromagnetic()
 
     try:
@@ -44,8 +44,6 @@ if __name__ == "__main__":
 
                 height = CALCUL.HEIGHT
                 while(1) :
-                    time.sleep(0.1)
-
                     theta1, theta2, theta3 = CALCUL.calculAngle(R, height)
 
                     theta1 = theta1 - Arm.degree.get('Y')
@@ -67,7 +65,7 @@ if __name__ == "__main__":
 
                     Axises[2].start()
                     Axises[2].join()
-                    time.sleep(0.5)
+                    time.sleep(0.1)
 
                     if CALCUL.CHECK_DIS > CALCUL.detect_distance() : 
                         Arm.getElement()
@@ -76,7 +74,7 @@ if __name__ == "__main__":
                         height = CALCUL.decreaseDis(height)
 
                     Arm.updateCurDegree()
-                Arm._INIT_()
+                Arm._INIT_(0)
                 iter = iter + 1
             elif iter == 1 :
                 theta0 = 65 - Arm.degree.get("X")
