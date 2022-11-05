@@ -6,8 +6,8 @@ import busio
 import adafruit_vl53l0x
 
 class CALCUL :
-    CHECK_DIS = 4.9
-    HEIGHT= 9
+    CHECK_DIS = 5.1
+    HEIGHT= 8
 
     def __init__(self):
         self.i2c = busio.I2C(board.SCL0, board.SDA0)
@@ -18,29 +18,66 @@ class CALCUL :
         while(True) :
             print(" << return distance >> ")
             # yield self.vl53.range*0.1
-            yield self.vl53*0.1
-        dis_list = []
-        for _ in range(5) :
-            distance = self.vl53.range*0.1
-            dis_list.append(distance)
+            # yield self.vl53*0.1
+        # dis_list = []
+        # print('detecting distance')
+        # for _ in range(5) :
+            # distance = self.vl53.range*0.1
+            # dis_list.append(distance)
             # print("Range: {0}cm".format(distance))
-        dis_list.sort()
-        total = dis_list[1:-1]
+        # dis_list.sort()
+        # total = dis_list[1:-1]
         # print(sum(total)/len(total))
-        return sum(total)/len(total)
+        # return sum(total)/len(total)
+        # return self.vl53.range*0.1
 
     def changeCoordinate(self,x,y):
-        H = 20
-        ## (0,0)을 중앙 하단으로 변경 
-        y = y + H     
+        # y = y* 1.06
+        #dir = 1
+        #csr = 163.2 + 25.5*(1-y)
+        #n = 36*x-18
+        #if n < 0:
+        #    dir = 0
+        #n=abs(n)    
+            
+        #b=2*csr*math.cos(((90-0.19*n)*math.pi)/180)
+        #a=18+25.5*y
+        #C=(90+0.19*n)*(math.pi)/(180)
+        #c=math.sqrt(a**2+b**2-2*a*b*math.cos(C))
+        #B=math.acos((c**2+a**2-b**2)/(2*a*c))
+        #print(n,a,b,c,C,B*180/math.pi)
+     
+        #if n == 0:
+        #   R = a
+        #   theta = 0
+        #else:
+        #    R = c
+        #    theta = (B*180)/math.pi
+        #if dir == 1:
+        #    theta = -theta
+
+        #print('theta : ' + str(theta))
+        #print('R : '+str(R))
+        # x = 19.25-38.5*x
+        x = 12.5-25*x
+        y = 25*y
+        H = 9
+
+        y=y+H
         R = math.sqrt(x**2+y**2)
         theta = math.tan(x/y) if x != 0 else 0
         theta = math.degrees(theta)
         return R , theta
 
     def calculAngle(self, px, py):
-        a1=17; a2=18
-        rsul2 = (2*math.atan((math.sqrt(((((a1 + a2)**2) - (px**2 + py**2))/((px**2 + py**2)-((a1 - a2)**2))))))) # calculate theta2
+        a1=17
+        a2=18
+        print(px,type(px))
+        print(py,type(py))
+        print(((((a1 + a2)**2) - (px**2 + py**2))/((px**2 + py**2)-((a1 - a2)**2))))
+        temp = math.sqrt(((((a1 + a2)**2) - (px**2 + py**2))/((px**2 + py**2)-((a1 - a2)**2))))
+        print(temp,type(temp))
+        rsul2 = (2*math.atan(temp)) # calculate theta2
         if rsul2 < 0: # if theta2 is negative
             theta2 = rsul2 # set theta2 to negative
         else: # if theta2 is positive
@@ -74,7 +111,7 @@ class CALCUL :
         return theta1, theta2, theta3
 
     def decreaseDis(self, height) :
-        height = height - 0.25
+        height = height - 0.2
         return height
         
 
