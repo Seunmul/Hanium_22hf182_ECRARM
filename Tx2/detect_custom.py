@@ -64,10 +64,15 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
 
     t0 = time.time()
     # Padded resize
+    # source = source[480:1440,75:1004]
+    #img = source[75:900,200:1000][0]
     img = letterbox(source, imgsz, stride=stride)[0]
-
+#    print(img)
+#    print(type(img))
     # Convert
+    
     img = img[:, :, ::-1].transpose(2, 0, 1)  # BGR to RGB, to 3x416x416
+    
     img = np.ascontiguousarray(img)
     
     # Directories
@@ -78,6 +83,8 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
     names = model.module.names if hasattr(model, 'module') else model.names
     colors = [[random.randint(0, 255) for _ in range(3)] for _ in names]
 
+   
+	
     # for path, img, in dataset:
     img = torch.from_numpy(img).to(device)
     img = img.half() if half else img.float()  # uint8 to fp16/32
@@ -121,9 +128,10 @@ def detect_run(device,imgsz,stride,model,half,save_txt,save_img,view_img,source)
                 if save_txt:  # Write to file
                     xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                     line = (cls, *xywh, conf) if opt.save_conf else (cls, *xywh)  # label format
+                    
                     with open(txt_path,'a') as f:
                         f.write(('%g ' * len(line)).rstrip() % line + '\n')
-                        # print(f" {line} + '\n'")
+                        print(f" {line} + '\n'")
                 if save_img or view_img:  # Add bbox to image
                     label = f'{names[int(cls)]} {conf:.2f}'
                     plot_one_box(xyxy, source, label=label, color=colors[int(cls)], line_thickness=1)
@@ -151,8 +159,8 @@ if __name__=="detect_custom":
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='best.pt', help='model.pt path(s)')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
-    parser.add_argument('--conf-thres', type=float, default=0.15, help='object confidence threshold')
-    parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
+    parser.add_argument('--conf-thres', type=float, default=0.23, help='object confidence threshold')
+    parser.add_argument('--iou-thres', type=float, default=0.35, help='IOU threshold for NMS')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--view-img', action='store_true', help='display results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
