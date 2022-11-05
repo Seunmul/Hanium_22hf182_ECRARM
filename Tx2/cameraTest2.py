@@ -2,7 +2,7 @@
 import cv2 # OpenCV(실시간 이미지 프로세싱) 모듈
 
 # 카메라 index 번호
-camera = 2
+camera = 1
 
 # VideoCapture : 카메라 열기
 capture = cv2.VideoCapture(camera)
@@ -35,6 +35,12 @@ Listener = Thread(name="_listener_", target=_listener_,
                           args=(), daemon=True)
 Listener.start()
 
+w_min =int( w*0.25 )
+w_max =int( w*0.75 )
+h_min =int( h*0.07 )
+h_max =int( h*0.93 )
+
+print(f'{w_min} X {w_max} | {h_min} X {h_max} ')
 while True:
     # read : 프레임 읽기
     # [return]
@@ -42,6 +48,7 @@ while True:
     # 2) 읽은 프레임
     retval, frame = capture.read()
     
+    frame=frame[h_min:h_max,int(w_min):int(w_max)]
     # 읽은 프레임이 없는 경우 종료
     if not retval:
         break

@@ -5,7 +5,6 @@ import socket
 import time
 import sys
 import os
-# from PIL import Image
 
 print(">> LOADING ML DETECITON MODEL ")
 #시스템 환경변수로부터 yolov7 path가져오기 : $WORK_HOME
@@ -21,7 +20,8 @@ import detect_custom as dc
 
 #소켓 서버 주소 불러오기
 # HOST = '155.230.25.98'
-HOST = '127.0.0.1'
+# HOST = '127.0.0.1'
+HOST = '192.168.0.2'
 PORT = 9999
 
 # 전역변수 선언
@@ -103,9 +103,10 @@ def _detect_(client):
         try :
             
             print(f" >> get img data from mem : {type(FRAME)}",end="\n\n")
+            crop_FRAME=FRAME[50:670,320:960].copy() 
             with dc.torch.no_grad():
                 save_dir, save_path, txt_path = dc.detect_run(
-                    dc.device, dc.imgsz, dc.stride, dc.model, dc.half, dc.save_txt, dc.save_img, dc.view_img, FRAME)
+                    dc.device, dc.imgsz, dc.stride, dc.model, dc.half, dc.save_txt, dc.save_img, dc.view_img, crop_FRAME)
             print(txt_path, end="\n\n")
 
             #txt파일 불러와서 detectedData 변수에 저장 #형식 : {'class': '5', 'x': '0.501852', 'y': '0.446759', 'm': '0.979012', 'h': '0.465741'}
@@ -216,12 +217,13 @@ def Load_Camera(index:int):
     print(">> 원본 동영상 너비(가로) : {}, 높이(세로) : {}".format(w, h))
 
     # 동영상 크기 변환
-    capture.set(dc.cv2.CAP_PROP_FRAME_WIDTH, 640) # 가로
-    capture.set(dc.cv2.CAP_PROP_FRAME_HEIGHT, 480) # 세로
+    capture.set(dc.cv2.CAP_PROP_FRAME_WIDTH, 1280) # 가로
+    capture.set(dc.cv2.CAP_PROP_FRAME_HEIGHT, 720) # 세로
 
     # 변환된 동영상 크기 정보
     w = capture.get(dc.cv2.CAP_PROP_FRAME_WIDTH)
     h = capture.get(dc.cv2.CAP_PROP_FRAME_HEIGHT)
+
     print(">> 변환된 동영상 너비(가로) : {}, 높이(세로) : {}".format(w, h))
     print(">> 카메라 로드 완료.")
 
@@ -240,7 +242,7 @@ def Load_Camera(index:int):
 if (__name__ == "__main__"):
     try:
         # 카메라 인덱스 및 연결
-        camera_index = 0
+        camera_index = 1
         camera_listener = Thread(name="Load_Camera", target=Load_Camera,
                           args=(camera_index,), daemon=True)
         camera_listener.start()
