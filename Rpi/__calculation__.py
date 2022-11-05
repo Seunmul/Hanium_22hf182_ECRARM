@@ -15,18 +15,18 @@ class CALCUL :
         pass
 
     def detect_distance(self) :
+        while(True) :
+            print(" << return distance >> ")
+            # yield self.vl53.range*0.1
+            yield self.vl53*0.1
         dis_list = []
-        
         for _ in range(5) :
             distance = self.vl53.range*0.1
             dis_list.append(distance)
             # print("Range: {0}cm".format(distance))
-
         dis_list.sort()
         total = dis_list[1:-1]
-        
         # print(sum(total)/len(total))
-
         return sum(total)/len(total)
 
     def changeCoordinate(self,x,y):
@@ -84,5 +84,7 @@ if __name__ == '__main__':
     # print( str(C.changeCoordinate(-10, 10))) 
     # print( str(C.changeCoordinate(10, 10))) 
     C.calculAngle(10,10)
+    distance=C.detect_distance()
+    print(next(distance))
 
 
