@@ -35,7 +35,7 @@ class Arm:
 
     # step moter contorl params
     STEP_MODE = 16  # step motor mode
-    STEP_FREQ = 400  # step moter signal frequency
+    STEP_FREQ = 700  # step moter signal frequency
     PINS = [STEPPIN_X, DIRPIN_X, ENPIN_X,
             STEPPIN_Y, DIRPIN_Y, ENPIN_Y,
             STEPPIN_Z, DIRPIN_Z, ENPIN_Z,
@@ -55,8 +55,7 @@ class Arm:
 
         self.que = Queue()
         self.degree = {"X": 0, "Y": 174, "Z": -58, "W": 15, "R": 0, "S": 0}
-        self.init_degree = {"X": 0, "Y": 174,
-                            "Z": -58, "W": 15, "R": 0, "S": 0}
+        self.init_degree = {"X": 0, "Y": 174,"Z": -58, "W": 15, "R": 0, "S": 0}
         self.sort_buckets = [[90, 50, 40, 0, 0], [65, 50, 40, 0, 0], [
             110, 50, 40, 0, 0], [-65, 50, 40, 0, 0], [-90, 50, 40, 0, 0]]
         self.PCA = PCA
@@ -94,7 +93,12 @@ class Arm:
         return
 
     ## init 쓰레드 쓰지 말기
-    def _INIT_(self):  # 무슨 각도에 있든지 초기 상태로 돌리는 함수
+    def _INIT_(self, num):  # 무슨 각도에 있든지 초기 상태로 돌리는 함수
+        if num==1:
+            Arm._SERVO_CONTROL_(self,"W", -15, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,)
+            time.sleep(0.5)
+            Arm._SERVO_CONTROL_(self,"W", 5, Arm.PCA_CHANNEL_W, Arm.MIN_PWM_W, Arm.INTERVAL_W,)
+
         theta0, theta1, theta2, theta3  = (self.init_degree.get('X')-self.degree.get('X')), \
              (self.init_degree.get('Y')-self.degree.get('Y')), \
                 (self.init_degree.get('Z')-self.degree.get('Z')), \
@@ -215,6 +219,7 @@ class Arm:
 
         if (AXIS == 'X'):
             STEP_PULSE_LEVEL_TIME = float(self.STEP_PULSE_LEVEL_TIME) / 2
+            
         else:
             STEP_PULSE_LEVEL_TIME = self.STEP_PULSE_LEVEL_TIME
 

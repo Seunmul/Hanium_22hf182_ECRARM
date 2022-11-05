@@ -1,14 +1,13 @@
 import math
 # import matplotlib.pyplot as plt
 import numpy as np
-
 import board
 import busio
 import adafruit_vl53l0x
 
 class CALCUL :
-    CHECK_DIS = 5.1
-    HEIGHT= 13
+    CHECK_DIS = 4.9
+    HEIGHT= 9
 
     def __init__(self):
         self.i2c = busio.I2C(board.SCL0, board.SDA0)
@@ -26,7 +25,7 @@ class CALCUL :
         dis_list.sort()
         total = dis_list[1:-1]
         
-        print(sum(total)/len(total))
+        # print(sum(total)/len(total))
 
         return sum(total)/len(total)
 
@@ -75,7 +74,7 @@ class CALCUL :
         return theta1, theta2, theta3
 
     def decreaseDis(self, height) :
-        height = height - 0.3
+        height = height - 0.25
         return height
         
 

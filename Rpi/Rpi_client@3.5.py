@@ -15,9 +15,9 @@ from threading import Thread
 # 3: resistor
 # 4: transistor
 
-
 # HOST = '155.230.25.98'
-HOST = '127.0.0.1'
+# HOST = '127.0.0.1'
+HOST = '192.168.0.15'
 PORT = 9999
 
 # receivedData 전역변수 선언
@@ -177,28 +177,28 @@ def _control_(client, Arm):
         y = 8 - float(receivedData['Detector']['data']['x'])*16
 
         R, x_d = CALCUL.changeCoordinate(y,x)
-        _arm_control_(Arm, x_d=x_d, y_d=0, z_d=0, w_d=0, r_d=0, s_d=0)
+        _arm_control_(client,Arm, x_d=x_d, y_d=0, z_d=0, w_d=0, r_d=0, s_d=0)
 
         # 라이다로 거리 줄이는 코드
         height = CALCUL.HEIGHT
-        while(1) :
-            time.sleep(0.1)
-            y_d, z_d, w_d = CALCUL.calculAngle(R, height)
-            y_d = y_d - Arm.degree.get('Y')
-            z_d = z_d - Arm.degree.get('Z')
-            w_d = w_d - Arm.degree.get('W')   
+        # while(1) :
+        #     time.sleep(0.1)
+        #     y_d, z_d, w_d = CALCUL.calculAngle(R, height)
+        #     y_d = y_d - Arm.degree.get('Y')
+        #     z_d = z_d - Arm.degree.get('Z')
+        #     w_d = w_d - Arm.degree.get('W')   
             
-            _arm_control_(Arm, x_d=0, y_d=y_d, z_d=z_d, w_d=w_d, r_d=0, s_d=0)
+        #     _arm_control_(client,Arm, x_d=0, y_d=y_d, z_d=z_d, w_d=w_d, r_d=0, s_d=0)
 
-            if CALCUL.CHECK_DIS > CALCUL.detect_distance() : 
-                Arm.getElement()
-                break
-            else :
-                height = CALCUL.decreaseDis(height)
+        #     if CALCUL.CHECK_DIS > CALCUL.detect_distance() : 
+        #         Arm.getElement()
+        #         break
+        #     else :
+        #         height = CALCUL.decreaseDis(height)
 
         # y축만 초기상태로
         y_d = 90 - Arm.degree.get('W')
-        _arm_control_(Arm, x_d=0, y_d=y_d, z_d=0, w_d=0, r_d=0, s_d=0)           
+        _arm_control_(client,Arm, x_d=0, y_d=y_d, z_d=0, w_d=0, r_d=0, s_d=0)           
         
         # 분류통으로 이동
         print(f">> 디텍터 수신 데이터 : {receivedData['Detector']['data']}")
@@ -233,7 +233,7 @@ def _control_(client, Arm):
             z_d = Arm.sort_buckets[4][2] - Arm.degree.get("Z")  
             w_d = Arm.sort_buckets[4][3] - Arm.degree.get("W")        # test value
 
-        _arm_control_(Arm, x_d=x_d, y_d=y_d, z_d=z_d, w_d=w_d, r_d=r_d, s_d=s_d)
+        _arm_control_(client,Arm, x_d=x_d, y_d=y_d, z_d=z_d, w_d=w_d, r_d=r_d, s_d=s_d)
         
         # 소자 놓기 및 초기상태
         time.sleep(0.5)
@@ -279,7 +279,7 @@ def Controller_Client(client, Arm):
     global receivedData
 
     # 컨트롤링 상태 지역변수 선언(컨트롤 중에는 true 상태 유지!)
-    isControlling = bool(True)
+    isControlling = bool(False)
 
     # 초기 상태 전송
     send_controller_data(client, status="initializing",
